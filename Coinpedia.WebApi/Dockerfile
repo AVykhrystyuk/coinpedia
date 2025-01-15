@@ -11,9 +11,9 @@ EXPOSE 8080
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["Coinpedia.WebApi/Coinpedia.WebApi.csproj", "Coinpedia.WebApi/"]
+COPY ["./Coinpedia.WebApi.csproj", "Coinpedia.WebApi/"]
 RUN dotnet restore "./Coinpedia.WebApi/Coinpedia.WebApi.csproj"
-COPY . .
+COPY . ./Coinpedia.WebApi
 WORKDIR "/src/Coinpedia.WebApi"
 RUN dotnet build "./Coinpedia.WebApi.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
