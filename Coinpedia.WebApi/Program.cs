@@ -1,3 +1,4 @@
+using Coinpedia.WebApi.Config;
 using Coinpedia.WebApi.Errors;
 using Coinpedia.WebApi.Handlers;
 using Coinpedia.WebApi.OpenApi;
@@ -11,6 +12,8 @@ builder.Services.ConfigureOptions<ConfigureSwaggerGenOptions>();
 
 builder.Services.AddProblemDetails(ConfigureProblemDetails.Configure);
 builder.Services.AddExceptionHandler<GlobalProblemExceptionHandler>();
+
+builder.Services.AddSettings(builder.Configuration);
 
 builder.Services.AddApiVersioningAndExplorer();
 

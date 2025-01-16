@@ -1,0 +1,6 @@
+services:
+  webapi:
+    container_name: coinpedia-web-api
+    image: coinpedia-web-api:latest
+    ports:
+      - "8080:8080"

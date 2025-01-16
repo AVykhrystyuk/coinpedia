@@ -1,0 +1,8 @@
+services:
+  webapi:
+    build:
+      context: .
+      dockerfile: ./Coinpedia.WebApi/Dockerfile
+
+    environment:
+      - Settings__Secret=${WebApi_Settings__Secret}

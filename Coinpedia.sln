@@ -1,9 +1,25 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35527.113 d17.12
+VisualStudioVersion = 17.12.35527.113
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Coinpedia.WebApi", "Coinpedia.WebApi\Coinpedia.WebApi.csproj", "{961F8BA0-94A6-44CE-B02E-DAB49C5D9C8B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{84FE6A4D-2AF1-4E37-ABDC-2F8867533B20}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{11C165F7-4909-4816-A3A7-6F5936484963}"
+	ProjectSection(SolutionItems) = preProject
+		.dockerignore = .dockerignore
+		.editorconfig = .editorconfig
+		.env.example = .env.example
+		.gitignore = .gitignore
+		Directory.Build.props = Directory.Build.props
+		docker-compose.override.yml = docker-compose.override.yml
+		docker-compose.yml = docker-compose.yml
+		README.md = README.md
+		run.bat = run.bat
+		run.sh = run.sh
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,5 +34,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{961F8BA0-94A6-44CE-B02E-DAB49C5D9C8B} = {84FE6A4D-2AF1-4E37-ABDC-2F8867533B20}
 	EndGlobalSection
 EndGlobal

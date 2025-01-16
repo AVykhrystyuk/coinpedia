@@ -1,10 +1,13 @@
-﻿namespace Coinpedia.WebApi.Handlers;
+﻿using Coinpedia.WebApi.Config;
+using Microsoft.Extensions.Options;
+
+namespace Coinpedia.WebApi.Handlers;
 
 public static class WeatherForecastHandlers
 {
     public static IEndpointRouteBuilder MapWeatherForecast(this IEndpointRouteBuilder builder)
     {
-        builder.MapGet("/", () => "obsolete")
+        builder.MapGet("/", (IOptions<Settings> settings) => $"obsolete: {settings.Value.Secret}")
             .WithName("obsolete")
             .WithOpenApi()
             .HasApiVersion(1)
