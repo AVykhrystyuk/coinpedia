@@ -1,6 +1,23 @@
 services:
+
   webapi:
-    container_name: coinpedia-web-api
     image: coinpedia-web-api:latest
+    container_name: coinpedia-web-api
     ports:
       - "8080:8080"
+    depends_on:
+      - seq
+    networks:
+      - backend
+
+  seq:
+    image: datalust/seq:latest
+    container_name: seq
+    ports:
+      - "${SEQ_HOST_INGESTION_PORT}:80"
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge

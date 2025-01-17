@@ -5,9 +5,9 @@ namespace Coinpedia.WebApi.Handlers;
 
 public static class WeatherForecastHandlers
 {
-    public static IEndpointRouteBuilder MapWeatherForecast(this IEndpointRouteBuilder builder)
+    public static RouteGroupBuilder MapWeatherForecast(this RouteGroupBuilder builder)
     {
-        builder.MapGet("/", (IOptions<Settings> settings) => $"obsolete: {settings.Value.Secret}")
+        builder.MapGet("/", (IOptions<Settings> settings) => settings.Value)
             .WithName("obsolete")
             .WithOpenApi()
             .HasApiVersion(1)

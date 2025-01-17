@@ -5,4 +5,10 @@ services:
       dockerfile: ./Coinpedia.WebApi/Dockerfile
 
     environment:
-      - Settings__Secret=${WebApi_Settings__Secret}
+      - Settings__SeqApiKey=${WebApi_Settings__SeqApiKey}
+      - Settings__SeqIngestionUrl=${WebApi_Settings__SeqIngestionUrl}
+
+  seq:
+    environment:
+      - SEQ_API_KEY=${WebApi_Settings__SeqApiKey}
+      - ACCEPT_EULA=Y
