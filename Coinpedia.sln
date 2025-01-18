@@ -21,6 +21,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		run.sh = run.sh
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Coinpedia.Core", "Coinpedia.Core\Coinpedia.Core.csproj", "{AA45F728-EE3D-47F1-861F-98B0ED1B3714}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,11 +33,16 @@ Global
 		{961F8BA0-94A6-44CE-B02E-DAB49C5D9C8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{961F8BA0-94A6-44CE-B02E-DAB49C5D9C8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{961F8BA0-94A6-44CE-B02E-DAB49C5D9C8B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AA45F728-EE3D-47F1-861F-98B0ED1B3714}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA45F728-EE3D-47F1-861F-98B0ED1B3714}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AA45F728-EE3D-47F1-861F-98B0ED1B3714}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AA45F728-EE3D-47F1-861F-98B0ED1B3714}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{961F8BA0-94A6-44CE-B02E-DAB49C5D9C8B} = {84FE6A4D-2AF1-4E37-ABDC-2F8867533B20}
+		{AA45F728-EE3D-47F1-861F-98B0ED1B3714} = {84FE6A4D-2AF1-4E37-ABDC-2F8867533B20}
 	EndGlobalSection
 EndGlobal

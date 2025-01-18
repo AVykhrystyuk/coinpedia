@@ -2,9 +2,9 @@
 
 namespace Coinpedia.WebApi.OpenApi;
 
-public static class ConfigureSwaggerUIOptions
+public static class SwaggerUIOptionsExtensions
 {
-    public static void Configure(SwaggerUIOptions options, WebApplication provider)
+    public static void Configure(this SwaggerUIOptions options, WebApplication provider)
     {
         foreach (var description in provider.DescribeApiVersions())
         {

@@ -5,17 +5,18 @@ using OpenTelemetry.Resources;
 
 namespace Coinpedia.WebApi.Logging;
 
-public static class ConfigureOpenTelemetryLoggerOptions
+public static class OpenTelemetryLoggerOptionsExtensions
 {
-    public static void Configure(OpenTelemetryLoggerOptions options, IWebHostEnvironment environment, Settings settings)
+    public static void Configure(this OpenTelemetryLoggerOptions options, IWebHostEnvironment environment, Settings settings)
     {
         options.SetResourceBuilder(
-        ResourceBuilder.CreateEmpty()
-            .AddService(environment.ApplicationName)
-            .AddAttributes(new Dictionary<string, object>
-            {
-                ["deployment.environment"] = environment.EnvironmentName,
-            }));
+            ResourceBuilder.CreateEmpty()
+                .AddService(environment.ApplicationName)
+                .AddAttributes(new Dictionary<string, object>
+                {
+                    ["deployment.environment"] = environment.EnvironmentName,
+                })
+        );
 
         options.IncludeScopes = true;
         options.IncludeFormattedMessage = true;

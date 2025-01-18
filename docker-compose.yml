@@ -14,7 +14,8 @@ services:
     image: datalust/seq:latest
     container_name: seq
     ports:
-      - "${SEQ_HOST_INGESTION_PORT}:80"
+      - "${SEQ_HOST_INGESTION_PORT}:5341"
+      - "8081:80"
     networks:
       - backend
 
