@@ -6,7 +6,11 @@ public class CorrelationIdMiddleware(ILogger<CorrelationIdMiddleware> logger) : 
 {
     public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {
-        CorrelationId.Value = context.Request.Headers[WellKnownHeaders.CorrelationId].FirstOrDefault()!;
+        var existingCorrelationId =
+            context.Request.Headers[WellKnownHeaders.CorrelationId].FirstOrDefault() ??
+            context.Response.Headers[WellKnownHeaders.CorrelationId].FirstOrDefault(); // to keep using and avoid overriding it below
+
+        CorrelationId.Value = existingCorrelationId!;
 
         var correlationId = CorrelationId.Value;
 

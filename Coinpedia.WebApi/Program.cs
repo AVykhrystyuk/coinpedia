@@ -4,15 +4,26 @@ using Coinpedia.WebApi.Handlers;
 using Coinpedia.WebApi.Middlewares;
 using Coinpedia.WebApi.Logging;
 using Coinpedia.WebApi.OpenApi;
+using Serilog;
+using Serilog.Enrichers.Span;
+using Serilog.Exceptions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var settings = builder.Configuration.GetSection(Settings.SectionKey).Get<Settings>() ?? throw new Exception("Setting are missing");
+var settings = builder.Configuration.GetSection(Settings.SectionKey).Get<Settings>() ?? 
+    throw new Exception($"{Settings.SectionKey} configuration section is missing");
+
+Log.Logger = new LoggerConfiguration()
+    .Enrich.FromLogContext()
+    .Enrich.WithSpan()
+    .Enrich.WithExceptionDetails()
+    .WriteTo.Console()
+    .WriteTo.OpenTelemetry(options => options.Configure(builder.Environment, settings))
+    .CreateLogger();
+
+builder.Services.AddSerilog();
 
 builder.Services.AddScoped<CorrelationIdMiddleware>();
-
-builder.Logging.ClearProviders();
-builder.Logging.AddOpenTelemetry(options => options.Configure(builder.Environment, settings));
 
 builder.Services.AddEndpointsApiExplorer();
 
