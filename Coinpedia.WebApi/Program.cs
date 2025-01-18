@@ -5,55 +5,72 @@ using Coinpedia.WebApi.Middlewares;
 using Coinpedia.WebApi.Logging;
 using Coinpedia.WebApi.OpenApi;
 using Serilog;
-using Serilog.Enrichers.Span;
-using Serilog.Exceptions;
-
-var builder = WebApplication.CreateBuilder(args);
-
-var settings = builder.Configuration.GetSection(Settings.SectionKey).Get<Settings>() ?? 
-    throw new Exception($"{Settings.SectionKey} configuration section is missing");
 
 Log.Logger = new LoggerConfiguration()
-    .Enrich.FromLogContext()
-    .Enrich.WithSpan()
-    .Enrich.WithExceptionDetails()
-    .WriteTo.Console()
-    .WriteTo.OpenTelemetry(options => options.Configure(builder.Environment, settings))
-    .CreateLogger();
+    .ConfigureBootstrap()
+    .CreateBootstrapLogger();
 
-builder.Services.AddSerilog();
+Log.Information("Starting application");
 
-builder.Services.AddScoped<CorrelationIdMiddleware>();
-
-builder.Services.AddEndpointsApiExplorer();
-
-builder.Services.AddSwaggerGen();
-builder.Services.ConfigureOptions<ConfigureSwaggerGenOptions>();
-
-builder.Services.AddProblemDetails(options => options.Configure());
-builder.Services.AddExceptionHandler<GlobalProblemExceptionHandler>();
-
-builder.Services.AddSettings(builder.Configuration);
-
-builder.Services.AddApiVersioningAndExplorer();
-
-var app = builder.Build();
-
-app.UseMiddleware<CorrelationIdMiddleware>();
-
-var routeBuilder = app.NewVersionedRouteBuilder();
-
-routeBuilder.MapGroup("/weather-forecasts").MapWeatherForecast().WithTags("Weather forecasts");
-
-// api/v1/cryptocurrencies/BTC/quotes/latest
-routeBuilder.MapGroup("/cryptocurrencies").MapCryptocurrencies().WithTags("Cryptocurrencies");
-
-// if (app.Environment.IsDevelopment())
+try
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(options => options.Configure(app));
+    var builder = WebApplication.CreateBuilder(args);
+
+    ConfigureServices(builder);
+
+    var app = builder.Build();
+
+    ConfigureApp(app);
+
+    app.Run();
+
+    Log.Information("Application stopped cleanly");
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "An unhandled exception occurred during bootstrapping. Application terminated unexpectedly.");
+}
+finally
+{
+    Log.CloseAndFlush();
 }
 
-app.UseExceptionHandler();
+static void ConfigureServices(WebApplicationBuilder builder)
+{
+    builder.Services.AddSerilog((services, loggerConfig) => loggerConfig.Configure(builder, services));
+    builder.Services.AddScoped<CorrelationIdMiddleware>();
 
-app.Run();
+    builder.Services.AddEndpointsApiExplorer();
+
+    builder.Services.AddSwaggerGen();
+    builder.Services.ConfigureOptions<ConfigureSwaggerGenOptions>();
+
+    builder.Services.AddProblemDetails(options => options.Configure());
+    builder.Services.AddExceptionHandler<GlobalProblemExceptionHandler>();
+
+    builder.Services.AddSettings(builder.Configuration);
+
+    builder.Services.AddApiVersioningAndExplorer();
+}
+
+static void ConfigureApp(WebApplication app)
+{
+    // if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI(options => options.Configure(app));
+    }
+
+    app.UseSerilogRequestLogging();
+
+    app.UseMiddleware<CorrelationIdMiddleware>();
+
+    var routeBuilder = app.NewVersionedRouteBuilder();
+
+    routeBuilder.MapGroup("/weather-forecasts").MapWeatherForecast().WithTags("Weather forecasts");
+
+    // api/v1/cryptocurrencies/BTC/quotes/latest
+    routeBuilder.MapGroup("/cryptocurrencies").MapCryptocurrencies().WithTags("Cryptocurrencies");
+
+    app.UseExceptionHandler();
+}
