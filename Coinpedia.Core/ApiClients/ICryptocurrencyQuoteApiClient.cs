@@ -16,5 +16,5 @@ public interface ICryptocurrencyQuoteApiClient
 }
 
 public record CryptocurrencyQuoteSearchQuery(
-    CryptocurrencySymbol Symbol,
+    CryptocurrencySymbol Cryptocurrency,
     CurrencySymbol BaseCurrency);

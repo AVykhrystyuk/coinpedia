@@ -1,14 +1,27 @@
-﻿namespace Coinpedia.Core.Domain;
+﻿using Coinpedia.Core.Errors;
+
+using CSharpFunctionalExtensions;
+
+namespace Coinpedia.Core.Domain;
 
 public record CryptocurrencyQuote(
-    CryptocurrencySymbol Symbol,
+    CryptocurrencySymbol Cryptocurrency,
     DateTime UpdatedAt,
     decimal Price,
     CurrencySymbol Currency
 )
 {
-    public MultiCurrencyCryptocurrencyQuotes Apply(CurrencyRates currencyRates)
+    public Result<MultiCurrencyCryptocurrencyQuotes, Error> Apply(CurrencyRates currencyRates)
     {
+        if (currencyRates.BaseCurrency != Currency)
+        {
+            return new InvalidInput
+            { 
+                Message = "BaseCurrency does not match", 
+                Context = new { quoteCurrency = Currency, currencyRatesCurrency = currencyRates.BaseCurrency, quote = this, currencyRates } 
+            };
+        }
+
         var pricePerCurrency = new Dictionary<CurrencySymbol, decimal>();
 
         foreach (var (currency, rate) in currencyRates.RatePerCurrency)
@@ -17,7 +30,7 @@ public record CryptocurrencyQuote(
         }
 
         return new MultiCurrencyCryptocurrencyQuotes(
-            Symbol,
+            Cryptocurrency,
             CryptocurrencyUpdatedAt: UpdatedAt,
             CurrencyRatesUpdatedAt: currencyRates.UpdatedAt,
             pricePerCurrency,

@@ -25,7 +25,7 @@ public class CoinMarketCapCryptocurrencyQuoteApiClient(
     {
         var url = $"/v2/cryptocurrency/quotes/latest" +
             $"?convert={searchQuery.BaseCurrency}" +
-            $"&symbol={searchQuery.Symbol}" +
+            $"&symbol={searchQuery.Cryptocurrency}" +
             $"&aux=date_added,platform,is_active,is_fiat";
 
         using var _ = logger.BeginAttributesScope(url, searchQuery);
@@ -82,7 +82,7 @@ public class CoinMarketCapCryptocurrencyQuoteApiClient(
                     logger.LogWarning("[CMC]: Data for more than one symbol is returned (while we only asked for one). Using the first one that matches the symbol");
                 }
 
-                if (!cryptocurrenciesPerSymbol.TryGetValue(searchQuery.Symbol.Value, out var cryptocurrencies))
+                if (!cryptocurrenciesPerSymbol.TryGetValue(searchQuery.Cryptocurrency.Value, out var cryptocurrencies))
                 {
                     logger.LogError("[CMC]: Unexpected response - cannot find cryptocurrencyData for requested symbol");
                     return new None { Message = "[CryptocurrencyApi]: Unexpected response - cannot find cryptocurrencyData for requested symbol", Context = Context() };
@@ -126,7 +126,7 @@ public class CoinMarketCapCryptocurrencyQuoteApiClient(
                     return new None { Message = "[CryptocurrencyApi]: Unexpected response - cannot find quoteData for base currency", Context = Context() };
                 }
 
-                return new CryptocurrencyQuote(searchQuery.Symbol, quote.LastUpdated, quote.Price ?? 0.0M, searchQuery.BaseCurrency);
+                return new CryptocurrencyQuote(searchQuery.Cryptocurrency, quote.LastUpdated, quote.Price ?? 0.0M, searchQuery.BaseCurrency);
             }
         }
         else // StatusCode is not successful

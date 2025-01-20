@@ -11,8 +11,8 @@ public interface ICryptocurrencyQuoteFetcher
 }
 
 public record MultiCurrencyCryptocurrencyQuotes(
-    CryptocurrencySymbol Symbol,
+    CryptocurrencySymbol Cryptocurrency,
     DateTime CryptocurrencyUpdatedAt,
     DateTime CurrencyRatesUpdatedAt,
     IReadOnlyDictionary<CurrencySymbol, decimal> PricePerCurrency,
-    CurrencySymbol Currency);
+    CurrencySymbol BaseCurrency);
