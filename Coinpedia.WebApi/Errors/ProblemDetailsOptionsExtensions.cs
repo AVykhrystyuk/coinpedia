@@ -1,7 +1,8 @@
 ﻿using Coinpedia.Core;
-using Serilog.Enrichers.Span;
 
 using Microsoft.AspNetCore.Http.Features;
+
+using Serilog.Enrichers.Span;
 
 namespace Coinpedia.WebApi.Errors;
 

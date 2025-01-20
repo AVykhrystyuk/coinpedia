@@ -11,6 +11,15 @@ public class Settings
 
     [Required]
     public required string SeqIngestionUrl { get; init; }
+
+    [Required]
+    public required string BaseCurrency { get; init; }
+
+    [Required]
+    public required string CoinMarketCapBaseUrl { get; init; }
+
+    [Required]
+    public required string CoinMarketCapApiKey { get; init; }
 };
 
 public static class SettingsExtensions

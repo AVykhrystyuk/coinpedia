@@ -1,9 +1,14 @@
+using Coinpedia.Core;
+using Coinpedia.Core.ApiClients;
 using Coinpedia.WebApi.Config;
 using Coinpedia.WebApi.Errors;
 using Coinpedia.WebApi.Handlers;
-using Coinpedia.WebApi.Middlewares;
 using Coinpedia.WebApi.Logging;
+using Coinpedia.WebApi.Middlewares;
 using Coinpedia.WebApi.OpenApi;
+
+using Microsoft.Extensions.Options;
+
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
@@ -40,13 +45,23 @@ static void ConfigureServices(WebApplicationBuilder builder)
     builder.Services.AddSerilog((services, loggerConfig) => loggerConfig.Configure(builder, services));
     builder.Services.AddScoped<CorrelationIdMiddleware>();
 
-    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddTransient<Settings>(sp => sp.GetRequiredService<IOptions<Settings>>().Value);
 
+    builder.Services.AddScoped<ICryptocurrencyQuoteApiClient, CoinMarketCapCryptocurrencyQuoteApiClient>();
+    builder.Services.AddHttpClient<ICryptocurrencyQuoteApiClient, CoinMarketCapCryptocurrencyQuoteApiClient>((sp, client) =>
+    {
+        var settings = sp.GetRequiredService<Settings>();
+        client.DefaultRequestHeaders.Add("X-Coinpedia-Correlation-ID", CorrelationId.Value);
+        client.DefaultRequestHeaders.Add("X-CMC_PRO_API_KEY", settings.CoinMarketCapApiKey);
+        client.BaseAddress = new Uri(settings.CoinMarketCapBaseUrl);
+    }).AddPolicyHandler(HttpRetryPolicies.Default());
+
+    builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
     builder.Services.ConfigureOptions<ConfigureSwaggerGenOptions>();
 
     builder.Services.AddProblemDetails(options => options.Configure());
-    builder.Services.AddExceptionHandler<GlobalProblemExceptionHandler>();
+    builder.Services.AddExceptionHandler<ProblemDetailsExceptionHandler>();
 
     builder.Services.AddSettings(builder.Configuration);
 
@@ -55,6 +70,8 @@ static void ConfigureServices(WebApplicationBuilder builder)
 
 static void ConfigureApp(WebApplication app)
 {
+    app.UseMiddleware<CorrelationIdMiddleware>();
+
     // if (app.Environment.IsDevelopment())
     {
         app.UseSwagger();
@@ -63,11 +80,7 @@ static void ConfigureApp(WebApplication app)
 
     app.UseSerilogRequestLogging();
 
-    app.UseMiddleware<CorrelationIdMiddleware>();
-
     var routeBuilder = app.NewVersionedRouteBuilder();
-
-    routeBuilder.MapGroup("/weather-forecasts").MapWeatherForecast().WithTags("Weather forecasts");
 
     // api/v1/cryptocurrencies/BTC/quotes/latest
     routeBuilder.MapGroup("/cryptocurrencies").MapCryptocurrencies().WithTags("Cryptocurrencies");

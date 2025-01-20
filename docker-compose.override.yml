@@ -5,8 +5,11 @@ services:
       dockerfile: ./Coinpedia.WebApi/Dockerfile
 
     environment:
+      - Settings__BaseCurrency=${WebApi_Settings__BaseCurrency}
       - Settings__SeqApiKey=${WebApi_Settings__SeqApiKey}
       - Settings__SeqIngestionUrl=${WebApi_Settings__SeqIngestionUrl}
+      - Settings__CoinMarketCapBaseUrl=${WebApi_Settings__CoinMarketCapBaseUrl}
+      - Settings__CoinMarketCapApiKey=${WebApi_Settings__CoinMarketCapApiKey}
 
   seq:
     environment:

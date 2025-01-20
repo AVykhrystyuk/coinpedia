@@ -1,7 +1,17 @@
-﻿using System.Text.Json;
-using System.Text.Json.Serialization;
+﻿using Coinpedia.Core;
+using Coinpedia.Core.ApiClients;
+using Coinpedia.Core.Domain;
+using Coinpedia.Core.Errors;
+using Coinpedia.WebApi.Config;
+using Coinpedia.WebApi.Logging;
 
+using CSharpFunctionalExtensions;
+
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+
+using Serilog;
 
 namespace Coinpedia.WebApi.Handlers;
 
@@ -16,63 +26,53 @@ public static class CryptocurrencyHandlers
             .WithOpenApi()
             .HasApiVersion(1);
 
-        builder.MapPost("/test", (CryptocurrencyQuote q) => q.Symbol)
-            .WithName($"{nameof(CryptocurrencyHandlers)}_test")
-            .WithOpenApi()
-            .HasApiVersion(1);
-
         return builder;
     }
 
-    public static CryptocurrencyQuote GetLatestQuote(string symbol, [FromServices] ILogger<Logs> logger)
+    public static async Task<Results<Ok<CryptocurrencyQuote>, JsonHttpResult<Error>>> GetLatestQuote(
+        [FromRoute(Name = "symbol")] string symbolRaw,
+        IOptions<Settings> settings,
+        [FromServices] ICryptocurrencyQuoteApiClient cryptocurrencyQuoteApiClient,
+        [FromServices] ILogger<Logs> logger,
+        [FromServices] IDiagnosticContext diagnosticContext,
+        CancellationToken cancellationToken)
     {
-        logger.LogInformation("GetLatestQuote was called. x={X}, y={Y}, symbol={Symbol}", 1, 2, symbol);
+        var baseCurrency = settings.Value.BaseCurrency;
 
-        using (logger.BeginScope(new Dictionary<string, object>
+        using var _ = logger.BeginAttributesScope(symbolRaw, baseCurrency, arg1Name: "symbol");
+
+        var (_, _, symbol, err) = CryptocurrencySymbol.TryCreate(symbolRaw);
+        if (err is not null)
         {
-            ["CustomerId"] = 12345,
-            ["OrderId"] = 54,
-            ["symbol"] = symbol
-        }))
-        {
-            logger.LogInformation("GetLatestQuote was called second time. x={X}, y={Y}, symbol={Symbol}", 3, 4, symbol);
+            return TypedResults.Json(err, statusCode: StatusCodes.Status400BadRequest);
         }
 
-        var summaries = new[]
+        var searchResult = await cryptocurrencyQuoteApiClient.GetCryptocurrencyQuote(
+            searchQuery: new CryptocurrencyQuoteSearchQuery(symbol, BaseCurrency: baseCurrency), 
+            cancellationToken);
+
+        if (searchResult.IsSuccess)
         {
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        };
+            return TypedResults.Ok(searchResult.Value); // TODO: DTO?
+        }
+        else // Failure
+        {
+            var error = searchResult.Error;
 
-        return new CryptocurrencyQuote
-        (
-            symbol,
-            DateOnly.FromDateTime(DateTime.Now),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        );
+            diagnosticContext.Error(error);
+
+            return error switch
+            {
+                Core.Errors.NotFound => Json(error, StatusCodes.Status404NotFound),
+                None => Json(error, StatusCodes.Status424FailedDependency),
+                TooManyRequests => Json(error, StatusCodes.Status429TooManyRequests),
+                InvalidInput => Json(error, StatusCodes.Status400BadRequest),
+                RequestCancelled => Json(error, StatusCodes.Status499ClientClosedRequest),
+                _ => Json(error, StatusCodes.Status500InternalServerError),
+            };
+        }
+
+        static JsonHttpResult<Error> Json(Error error, int statusCode) =>
+            TypedResults.Json(error, statusCode: statusCode);
     }
-}
-
-[JsonConverter(typeof(JsonConverter))]
-public record CryptocurrencySymbol(string Symbol)
-{
-    //public static bool TryParse(string rawValue, out CryptocurrencySymbol result)
-    //{
-    //    result = new CryptocurrencySymbol(rawValue);
-    //    return true;
-    //}
-
-    public class JsonConverter : JsonConverter<CryptocurrencySymbol>
-    {
-        public override CryptocurrencySymbol Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
-            new CryptocurrencySymbol(reader.GetString()!);
-
-        public override void Write(Utf8JsonWriter writer, CryptocurrencySymbol symbol, JsonSerializerOptions options) =>
-            writer.WriteStringValue(symbol.Symbol);
-    }
-}
-
-public record CryptocurrencyQuote(string Symbol, DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 }

@@ -1,4 +1,5 @@
-﻿using Coinpedia.WebApi.Config;
+﻿using Coinpedia.Core.Errors;
+using Coinpedia.WebApi.Config;
 
 using Serilog;
 using Serilog.Enrichers.Span;
@@ -27,10 +28,24 @@ public static class LoggerConfigurationExtensions
             .Enrich.FromLogContext()
             .Enrich.WithSpan()
             .Enrich.WithExceptionDetails()
-            .MinimumLevel.Override("Microsoft.AspNetCore.Hosting", LogEventLevel.Warning)
-            .MinimumLevel.Override("Microsoft.AspNetCore.Mvc", LogEventLevel.Warning)
-            .MinimumLevel.Override("Microsoft.AspNetCore.Routing", LogEventLevel.Warning)
+            .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+            //.MinimumLevel.Override("Microsoft.AspNetCore.Hosting", LogEventLevel.Warning)
+            //.MinimumLevel.Override("Microsoft.AspNetCore.Mvc", LogEventLevel.Warning)
+            //.MinimumLevel.Override("Microsoft.AspNetCore.Routing", LogEventLevel.Warning)
+            //.MinimumLevel.Override("Microsoft.AspNetCore.Http", LogEventLevel.Warning)
             .WriteTo.Console()
             .WriteTo.OpenTelemetry(options => options.Configure(builder.Environment, settings));
+    }
+
+    public static T Error<T>(this IDiagnosticContext context, T error)
+        where T: Error
+    {
+        if (error.Exception is { } ex)
+        {
+            context.SetException(ex);
+        }
+
+        context.Set("Error", error, destructureObjects: true);
+        return error;
     }
 }
