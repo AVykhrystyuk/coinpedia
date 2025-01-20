@@ -1,15 +1,12 @@
 ﻿using Coinpedia.Core;
-using Coinpedia.Core.ApiClients;
 using Coinpedia.Core.Domain;
 using Coinpedia.Core.Errors;
-using Coinpedia.WebApi.Config;
 using Coinpedia.WebApi.Logging;
 
 using CSharpFunctionalExtensions;
 
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 
 using Serilog;
 
@@ -29,17 +26,14 @@ public static class CryptocurrencyHandlers
         return builder;
     }
 
-    public static async Task<Results<Ok<CryptocurrencyQuote>, JsonHttpResult<Error>>> GetLatestQuote(
+    public static async Task<Results<Ok<MultiCurrencyCryptocurrencyQuotes>, JsonHttpResult<Error>>> GetLatestQuote(
         [FromRoute(Name = "symbol")] string symbolRaw,
-        IOptions<Settings> settings,
-        [FromServices] ICryptocurrencyQuoteApiClient cryptocurrencyQuoteApiClient,
+        [FromServices] ICryptocurrencyQuoteFetcher cryptocurrencyQuoteFetcher,
         [FromServices] ILogger<Logs> logger,
         [FromServices] IDiagnosticContext diagnosticContext,
         CancellationToken cancellationToken)
     {
-        var baseCurrency = settings.Value.BaseCurrency;
-
-        using var _ = logger.BeginAttributesScope(symbolRaw, baseCurrency, arg1Name: "symbol");
+        using var _ = logger.BeginAttributesScope(symbolRaw, arg1Name: "symbol");
 
         var (_, _, symbol, err) = CryptocurrencySymbol.TryCreate(symbolRaw);
         if (err is not null)
@@ -47,19 +41,16 @@ public static class CryptocurrencyHandlers
             return TypedResults.Json(err, statusCode: StatusCodes.Status400BadRequest);
         }
 
-        var searchResult = await cryptocurrencyQuoteApiClient.GetCryptocurrencyQuote(
-            searchQuery: new CryptocurrencyQuoteSearchQuery(symbol, BaseCurrency: baseCurrency), 
-            cancellationToken);
-
+        var searchResult = await cryptocurrencyQuoteFetcher.FetchCryptocurrencyQuote(symbol, cancellationToken);
         if (searchResult.IsSuccess)
         {
-            return TypedResults.Ok(searchResult.Value); // TODO: DTO?
+            return TypedResults.Ok(searchResult.Value); // TODO: output as a DTO?
         }
         else // Failure
         {
             var error = searchResult.Error;
 
-            diagnosticContext.Error(error);
+            diagnosticContext.Error(error); // logged during SerilogRequestLogging
 
             return error switch
             {

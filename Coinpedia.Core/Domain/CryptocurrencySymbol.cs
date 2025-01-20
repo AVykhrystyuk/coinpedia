@@ -29,5 +29,11 @@ public record CryptocurrencySymbol(string Value)
 
         public override void Write(Utf8JsonWriter writer, CryptocurrencySymbol symbol, JsonSerializerOptions options) =>
             writer.WriteStringValue(symbol.Value);
+
+        public override CryptocurrencySymbol ReadAsPropertyName(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            => new CryptocurrencySymbol(reader.GetString()!);
+
+        public override void WriteAsPropertyName(Utf8JsonWriter writer, CryptocurrencySymbol value, JsonSerializerOptions options)
+            => writer.WritePropertyName(value.ToString());
     }
 }

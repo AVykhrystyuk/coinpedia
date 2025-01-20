@@ -2,6 +2,7 @@
 using System.Text.Json.Serialization;
 
 using Coinpedia.Core.Common;
+using Coinpedia.Core.Domain;
 using Coinpedia.Core.Errors;
 
 using CSharpFunctionalExtensions;
@@ -15,6 +16,9 @@ public class CoinMarketCapCryptocurrencyQuoteApiClient(
     ILogger<CoinMarketCapCryptocurrencyQuoteApiClient> logger
 ) : ICryptocurrencyQuoteApiClient
 {
+    /// <returns>
+    /// CryptocurrencyQuote | RequestCancelled | None | NotFound | TooManyRequests | InternalError
+    /// </returns>
     public async Task<Result<CryptocurrencyQuote, Error>> GetCryptocurrencyQuote(
         CryptocurrencyQuoteSearchQuery searchQuery,
         CancellationToken cancellationToken = default)
@@ -35,7 +39,7 @@ public class CoinMarketCapCryptocurrencyQuoteApiClient(
         }
         catch (Exception ex) when (cancellationToken.IsCancellationRequested)
         {
-            return new RequestCancelled { Message = $"Request cancelled", Context = Context(), Exception = ex };
+            return new RequestCancelled { Message = "[CryptocurrencyApi]: Request cancelled", Context = Context(), Exception = ex };
         }
         catch (Exception ex)
         {
@@ -43,7 +47,7 @@ public class CoinMarketCapCryptocurrencyQuoteApiClient(
 
             return new InternalError
             {
-                Message = $"Unexpected exception '{url}': {ex.Message}",
+                Message = $"[CryptocurrencyApi]: Unexpected exception: {ex.Message}",
                 Context = Context(),
                 Exception = ex
             };
@@ -55,7 +59,7 @@ public class CoinMarketCapCryptocurrencyQuoteApiClient(
             {
                 logger.LogError("[CMC]: Unexpected response - empty.");
 
-                return new None { Message = $"Unexpected '{url}' response: empty", Context = Context() };
+                return new None { Message = $"[CryptocurrencyApi]: Unexpected response: empty", Context = Context() };
             }
 
             return DeserializeResponseContent(responseContentAsText, logger)
@@ -70,7 +74,7 @@ public class CoinMarketCapCryptocurrencyQuoteApiClient(
                 if (cryptocurrenciesPerSymbol.Count < 1)
                 {
                     logger.LogError("[CMC]: Unexpected response - 'data' collection is empty");
-                    return new None { Message = "Unexpected response - data collection is empty", Context = Context() };
+                    return new None { Message = "[CryptocurrencyApi]: Unexpected response - data collection is empty", Context = Context() };
                 }
 
                 if (cryptocurrenciesPerSymbol.Count > 1)
@@ -81,7 +85,7 @@ public class CoinMarketCapCryptocurrencyQuoteApiClient(
                 if (!cryptocurrenciesPerSymbol.TryGetValue(searchQuery.Symbol.Value, out var cryptocurrencies))
                 {
                     logger.LogError("[CMC]: Unexpected response - cannot find cryptocurrencyData for requested symbol");
-                    return new None { Message = "Unexpected response - cannot find cryptocurrencyData for requested symbol", Context = Context() };
+                    return new None { Message = "[CryptocurrencyApi]: Unexpected response - cannot find cryptocurrencyData for requested symbol", Context = Context() };
                 }
 
                 using var _2 = logger.BeginAttributesScope(cryptocurrencies.Count);
@@ -89,7 +93,7 @@ public class CoinMarketCapCryptocurrencyQuoteApiClient(
                 if (cryptocurrencies.Count < 1)
                 {
                     logger.LogError("[CMC]: Unexpected response - cryptocurrencies are empty for the symbol");
-                    return new NotFound { Message = "Unexpected response - cryptocurrencies are empty for the symbol", Context = Context() };
+                    return new NotFound { Message = "[CryptocurrencyApi]: Unexpected response - cryptocurrencies are empty for the symbol", Context = Context() };
                 }
 
                 var highestMarketCapCryptocurrency = cryptocurrencies.First();
@@ -108,7 +112,7 @@ public class CoinMarketCapCryptocurrencyQuoteApiClient(
                 if (quotePerCurrency.Count < 1)
                 {
                     logger.LogError("[CMC]: Unexpected response - 'quote' collection is empty");
-                    return new None { Message = "Unexpected response - 'quote' collection is empty", Context = Context() };
+                    return new None { Message = "[CryptocurrencyApi]: Unexpected response - 'quote' collection is empty", Context = Context() };
                 }
 
                 if (quotePerCurrency.Count > 1)
@@ -116,36 +120,38 @@ public class CoinMarketCapCryptocurrencyQuoteApiClient(
                     logger.LogWarning("[CMC]: 'quote' has data for more than one currency (while we only asked for one). Using the one that matches base currency");
                 }
 
-                if (!quotePerCurrency.TryGetValue(searchQuery.BaseCurrency, out var quote))
+                if (!quotePerCurrency.TryGetValue(searchQuery.BaseCurrency.Value, out var quote))
                 {
                     logger.LogError("[CMC]: Unexpected response - cannot find quoteData for base currency");
-                    return new None { Message = "Unexpected response - cannot find quoteData for base currency", Context = Context() };
+                    return new None { Message = "[CryptocurrencyApi]: Unexpected response - cannot find quoteData for base currency", Context = Context() };
                 }
 
-                return new CryptocurrencyQuote(searchQuery.Symbol, quote.LastUpdated, quote.Price, searchQuery.BaseCurrency);
+                return new CryptocurrencyQuote(searchQuery.Symbol, quote.LastUpdated, quote.Price ?? 0.0M, searchQuery.BaseCurrency);
             }
         }
         else // StatusCode is not successful
         {
             var (_, _, responseContent, error) = DeserializeResponseContent(responseContentAsText, logger);
 
-            logger.LogError("[CMC]: returned non-successful response for latest cryptocurrency quotes");
+            logger.LogError("[CMC]: non-successful response for latest cryptocurrency quotese, {@ResponseContentStatus}", responseContent?.Status);
 
             switch (response.StatusCode)
             {
                 case HttpStatusCode.NotFound:
-                    // NOTE: never saw being retuned, CoinMarketCap tends to return and empty object instead
-                    return new NotFound { Message = "Cryptocurrency is not found", Context = Context() };
+                    // NOTE: never saw NotFound being returned, CoinMarketCap tends to return and empty object instead
+                    return new NotFound { Message = "[CryptocurrencyApi]: Cryptocurrency is not found", Context = Context() };
                 case HttpStatusCode.TooManyRequests:
-                    return new TooManyRequests { Message = "The API rate limit was exceeded; consider slowing down your API Request frequency", Context = Context() };
+                    return new TooManyRequests { Message = "[CryptocurrencyApi]: The API rate limit was exceeded; consider slowing down your API Request frequency", Context = Context() };
+                case HttpStatusCode.PaymentRequired:
+                    logger.Log(LogLevel.Critical, "[CMC]: API request was rejected due to it being a paid subscription plan with an overdue balance");
+                    return new InternalError { Message = "[CryptocurrencyApi]: Unexpected response", Context = Context() };
                 case var c:
-                    logger.LogError("[CMC]: Unexpected response, {status}, {@error}", responseContent?.Status, error);
-                    return new InternalError { Message = $"Unexpected response", Context = NonSuccessfulContext(response.StatusCode) };
+                    return new InternalError { Message = "[CryptocurrencyApi]: Unexpected response", Context = NonSuccessfulContext(response.StatusCode) };
             }
         }
 
-        object Context() => new { searchQuery.Symbol, searchQuery.BaseCurrency };
-        object NonSuccessfulContext(HttpStatusCode statusCode) => new { statusCode, searchQuery.Symbol, searchQuery.BaseCurrency };
+        object Context() => new { searchQuery };
+        object NonSuccessfulContext(HttpStatusCode statusCode) => new { statusCode, searchQuery };
 
         static Result<ResponseContent, Error> DeserializeResponseContent(string json, ILogger logger) =>
             JsonSerializerEx.Deserialize<ResponseContent>(json)
@@ -237,7 +243,7 @@ public class CoinMarketCapCryptocurrencyQuoteApiClient(
     public class Quote
     {
         [JsonPropertyName("price")]
-        public required decimal Price { get; init; }
+        public decimal? Price { get; init; }
 
         [JsonPropertyName("volume_24h")]
         public decimal? Volume24H { get; init; }

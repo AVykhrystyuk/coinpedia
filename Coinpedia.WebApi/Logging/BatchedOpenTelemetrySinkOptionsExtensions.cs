@@ -6,13 +6,13 @@ namespace Coinpedia.WebApi.Logging;
 
 public static class BatchedOpenTelemetrySinkOptionsExtensions
 {
-    public static void Configure(this BatchedOpenTelemetrySinkOptions options, IWebHostEnvironment environment, Settings settings)
+    public static void Configure(this BatchedOpenTelemetrySinkOptions options, IWebHostEnvironment environment, SeqSettings settings)
     {
-        options.Endpoint = settings.SeqIngestionUrl;
+        options.Endpoint = settings.IngestionUrl;
         options.Protocol = OtlpProtocol.HttpProtobuf;
         options.Headers = new Dictionary<string, string>
         {
-            ["X-Seq-ApiKey"] = settings.SeqApiKey,
+            ["X-Seq-ApiKey"] = settings.ApiKey,
         };
         options.ResourceAttributes = new Dictionary<string, object>
         {

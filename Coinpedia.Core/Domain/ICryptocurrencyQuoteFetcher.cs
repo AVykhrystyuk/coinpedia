@@ -1,0 +1,18 @@
+﻿using Coinpedia.Core.Domain;
+using Coinpedia.Core.Errors;
+
+using CSharpFunctionalExtensions;
+
+namespace Coinpedia.Core;
+
+public interface ICryptocurrencyQuoteFetcher
+{
+    Task<Result<MultiCurrencyCryptocurrencyQuotes, Error>> FetchCryptocurrencyQuote(CryptocurrencySymbol symbol, CancellationToken cancellationToken);
+}
+
+public record MultiCurrencyCryptocurrencyQuotes(
+    CryptocurrencySymbol Symbol,
+    DateTime CryptocurrencyUpdatedAt,
+    DateTime CurrencyRatesUpdatedAt,
+    IReadOnlyDictionary<CurrencySymbol, decimal> PricePerCurrency,
+    CurrencySymbol Currency);

@@ -6,12 +6,13 @@ services:
 
     environment:
       - Settings__BaseCurrency=${WebApi_Settings__BaseCurrency}
-      - Settings__SeqApiKey=${WebApi_Settings__SeqApiKey}
-      - Settings__SeqIngestionUrl=${WebApi_Settings__SeqIngestionUrl}
-      - Settings__CoinMarketCapBaseUrl=${WebApi_Settings__CoinMarketCapBaseUrl}
-      - Settings__CoinMarketCapApiKey=${WebApi_Settings__CoinMarketCapApiKey}
-
+      - Seq__ApiKey=${WebApi_Seq__ApiKey}
+      - Seq__IngestionUrl=${WebApi_Seq__IngestionUrl}
+      - CoinMarketCap__BaseUrl=${WebApi_CoinMarketCap__BaseUrl}
+      - CoinMarketCap__CapApiKey=${WebApi_CoinMarketCap__ApiKey}
+      - ExchangeRates__BaseUrl=${WebApi_ExchangeRates__BaseUrl}
+      - ExchangeRates__CapApiKey=${WebApi_ExchangeRates__ApiKey}
   seq:
     environment:
-      - SEQ_API_KEY=${WebApi_Settings__SeqApiKey}
+      - SEQ_API_KEY=${WebApi_Seq__ApiKey}
       - ACCEPT_EULA=Y

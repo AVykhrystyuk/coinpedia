@@ -8,17 +8,13 @@ namespace Coinpedia.Core.ApiClients;
 public interface ICryptocurrencyQuoteApiClient
 {
     /// <returns>
-    /// CryptocurrencyQuote | None | PaymentRequired | TooManyRequests | InternalError
+    /// CryptocurrencyQuote | RequestCancelled | None | NotFound | TooManyRequests | InternalError
     /// </returns>
     Task<Result<CryptocurrencyQuote, Error>> GetCryptocurrencyQuote(
         CryptocurrencyQuoteSearchQuery searchQuery,
         CancellationToken cancellationToken = default);
 }
 
-public record CryptocurrencyQuoteSearchQuery(CryptocurrencySymbol Symbol, string BaseCurrency);
-
-public record CryptocurrencyQuote(
+public record CryptocurrencyQuoteSearchQuery(
     CryptocurrencySymbol Symbol,
-    DateTime UpdatedAt,
-    decimal Price,
-    string Currency);
+    CurrencySymbol BaseCurrency);

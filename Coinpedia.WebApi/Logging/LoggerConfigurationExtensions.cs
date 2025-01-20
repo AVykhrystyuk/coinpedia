@@ -20,8 +20,8 @@ public static class LoggerConfigurationExtensions
 
     public static LoggerConfiguration Configure(this LoggerConfiguration config, WebApplicationBuilder builder, IServiceProvider services)
     {
-        var settings = builder.Configuration.GetSection(Settings.SectionKey).Get<Settings>() 
-            ?? throw new Exception($"{Settings.SectionKey} configuration section is missing");
+        var settings = builder.Configuration.GetSection(SeqSettings.SectionKey).Get<SeqSettings>() 
+            ?? throw new Exception($"{SeqSettings.SectionKey} configuration section is missing");
 
         return config
             .ReadFrom.Services(services)
