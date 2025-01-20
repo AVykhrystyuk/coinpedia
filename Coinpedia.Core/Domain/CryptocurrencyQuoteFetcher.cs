@@ -12,7 +12,7 @@ namespace Coinpedia.Core.Domain;
 
 public class CryptocurrencyQuoteFetcher(
     ICryptocurrencyQuoteApiClient cryptocurrencyQuoteApiClient,
-    IExchangeRatesApiClient exchangeRatesApiClient,
+    ICurrencyRatesApiClient exchangeRatesApiClient,
     IOptions<ICryptocurrencyQuoteFetcherSettings> settings,
     ILogger<CryptocurrencyQuoteFetcher> logger
 ) : ICryptocurrencyQuoteFetcher

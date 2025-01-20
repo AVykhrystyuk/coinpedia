@@ -17,6 +17,7 @@
  
   <ItemGroup>
     <ProjectReference Include="..\Coinpedia.Core\Coinpedia.Core.csproj" />
+    <ProjectReference Include="..\Coinpedia.Infrastructure\Coinpedia.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

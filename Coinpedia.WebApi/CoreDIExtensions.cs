@@ -3,6 +3,7 @@ using Coinpedia.Core;
 using Coinpedia.WebApi.Config;
 using Microsoft.Extensions.Options;
 using Coinpedia.Core.Domain;
+using Coinpedia.Infrastructure.ApiClients;
 
 namespace Coinpedia.WebApi;
 
@@ -27,9 +28,9 @@ public static class CoreDIExtensions
     {
         services.AddTransient<IOptions<IExchangeRatesSettings>>(sp => sp.GetRequiredService<IOptions<ExchangeRatesSettings>>());
 
-        services.AddScoped<IExchangeRatesApiClient, ExchangeRatesApiClient>();
+        services.AddScoped<ICurrencyRatesApiClient, ExchangeRatesApiClient>();
 
-        services.AddHttpClient<IExchangeRatesApiClient, ExchangeRatesApiClient>((sp, client) =>
+        services.AddHttpClient<ICurrencyRatesApiClient, ExchangeRatesApiClient>((sp, client) =>
         {
             var settings = sp.GetRequiredService<IOptions<ExchangeRatesSettings>>().Value;
             client.DefaultRequestHeaders.Add("X-Coinpedia-Correlation-ID", CorrelationId.Value);

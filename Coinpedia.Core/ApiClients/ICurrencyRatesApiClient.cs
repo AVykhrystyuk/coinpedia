@@ -5,12 +5,12 @@ using CSharpFunctionalExtensions;
 
 namespace Coinpedia.Core.ApiClients;
 
-public interface IExchangeRatesApiClient
+public interface ICurrencyRatesApiClient
 {
     /// <returns>
     /// CurrencyRates | RequestCancelled | None | TooManyRequests | InternalError
     /// </returns>
-    Task<Result<CurrencyRates, Error>> GetCurrencyRates(GetCurrencyRatesQuery query, CancellationToken cancellationToken = default);
+    Task<Result<CurrencyRates, Error>> GetCurrencyRates(GetCurrencyRatesQuery ratesQuery, CancellationToken cancellationToken = default);
 }
 
 public record GetCurrencyRatesQuery(

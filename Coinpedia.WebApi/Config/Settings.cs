@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-using Coinpedia.Core.ApiClients;
 using Coinpedia.Core.Domain;
+using Coinpedia.Infrastructure.ApiClients;
 
 namespace Coinpedia.WebApi.Config;
 

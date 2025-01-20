@@ -15,10 +15,12 @@ WORKDIR /src
 COPY ["./Directory.Build.props", "."]
 COPY ["./Coinpedia.WebApi/Coinpedia.WebApi.csproj", "./Coinpedia.WebApi/"]
 COPY ["./Coinpedia.Core/Coinpedia.Core.csproj", "./Coinpedia.Core/"]
+COPY ["./Coinpedia.Infrastructure/Coinpedia.Infrastructure.csproj", "./Coinpedia.Infrastructure/"]
 RUN dotnet restore "./Coinpedia.WebApi/Coinpedia.WebApi.csproj"
 
 COPY ["./Coinpedia.WebApi", "./Coinpedia.WebApi"]
 COPY ["./Coinpedia.Core", "./Coinpedia.Core"]
+COPY ["./Coinpedia.Infrastructure", "./Coinpedia.Infrastructure"]
 WORKDIR "/src/Coinpedia.WebApi"
 RUN dotnet build "./Coinpedia.WebApi.csproj" -c $BUILD_CONFIGURATION -o /app/build
 

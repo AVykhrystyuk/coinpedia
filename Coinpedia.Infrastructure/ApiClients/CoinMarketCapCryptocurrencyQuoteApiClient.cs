@@ -1,6 +1,8 @@
 ﻿using System.Net;
 using System.Text.Json.Serialization;
 
+using Coinpedia.Core;
+using Coinpedia.Core.ApiClients;
 using Coinpedia.Core.Common;
 using Coinpedia.Core.Domain;
 using Coinpedia.Core.Errors;
@@ -9,7 +11,7 @@ using CSharpFunctionalExtensions;
 
 using Microsoft.Extensions.Logging;
 
-namespace Coinpedia.Core.ApiClients;
+namespace Coinpedia.Infrastructure.ApiClients;
 
 public class CoinMarketCapCryptocurrencyQuoteApiClient(
     HttpClient httpClient,

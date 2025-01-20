@@ -1,6 +1,8 @@
 ﻿using System.Net;
 using System.Text.Json.Serialization;
 
+using Coinpedia.Core;
+using Coinpedia.Core.ApiClients;
 using Coinpedia.Core.Common;
 using Coinpedia.Core.Domain;
 using Coinpedia.Core.Errors;
@@ -10,34 +12,34 @@ using CSharpFunctionalExtensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Coinpedia.Core.ApiClients;
+namespace Coinpedia.Infrastructure.ApiClients;
 
 public class ExchangeRatesApiClient(
     HttpClient httpClient,
     ILogger<ExchangeRatesApiClient> logger,
     IOptions<IExchangeRatesSettings> settings
-) : IExchangeRatesApiClient
+) : ICurrencyRatesApiClient
 {
     /// <returns>
     /// CurrencyRates | RequestCancelled | None | TooManyRequests | InternalError
     /// </returns>
     public async Task<Result<CurrencyRates, Error>> GetCurrencyRates(
-        GetCurrencyRatesQuery query,
+        GetCurrencyRatesQuery ratesQuery,
         CancellationToken cancellationToken = default
     )
     {
         var apiKey = settings.Value.ApiKey;
 
-        var currencies = query.ForCurrencies
+        var currencies = ratesQuery.ForCurrencies
             .DistinctBy(c => c.Value)
             .ToList();
 
         var url = $"/v1/latest" +
             $"?access_key={apiKey}" +
             $"&symbols={string.Join(",", currencies)}" +
-            $"&base={query.BaseCurrency}";
+            $"&base={ratesQuery.BaseCurrency}";
 
-        using var _ = logger.BeginAttributesScope(url, query);
+        using var _ = logger.BeginAttributesScope(url, ratesQuery);
 
         HttpResponseMessage response;
         string responseContentAsText;
@@ -91,7 +93,7 @@ public class ExchangeRatesApiClient(
 
                 var updatedAt = DateTimeOffset.FromUnixTimeSeconds(responseContent.UnixTimestamp).UtcDateTime;
 
-                return new CurrencyRates(ratePerCurrency, query.BaseCurrency, updatedAt);
+                return new CurrencyRates(ratePerCurrency, ratesQuery.BaseCurrency, updatedAt);
             }
         }
         else // StatusCode is not successful
@@ -120,8 +122,8 @@ public class ExchangeRatesApiClient(
             }
         }
 
-        object Context() => new { query };
-        object NonSuccessfulContext(HttpStatusCode statusCode) => new { statusCode, query };
+        object Context() => new { ratesQuery };
+        object NonSuccessfulContext(HttpStatusCode statusCode) => new { statusCode, ratesQuery };
 
         static Result<ResponseContent, Error> DeserializeResponseContent(string json, ILogger logger) =>
             JsonSerializerEx.Deserialize<ResponseContent>(json)

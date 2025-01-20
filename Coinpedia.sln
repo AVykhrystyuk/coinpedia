@@ -27,6 +27,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Coinpedia.Core.Tests", "Coi
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{D76F4234-A9B3-41D1-8E82-9840459E512C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Coinpedia.Infrastructure", "Coinpedia.Infrastructure\Coinpedia.Infrastructure.csproj", "{F6E7F994-3262-4289-A543-BDED1C5611BD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{6D37C1AF-30A5-4AC9-8766-39102D269718}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6D37C1AF-30A5-4AC9-8766-39102D269718}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6D37C1AF-30A5-4AC9-8766-39102D269718}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6E7F994-3262-4289-A543-BDED1C5611BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6E7F994-3262-4289-A543-BDED1C5611BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6E7F994-3262-4289-A543-BDED1C5611BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6E7F994-3262-4289-A543-BDED1C5611BD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -53,5 +59,6 @@ Global
 		{961F8BA0-94A6-44CE-B02E-DAB49C5D9C8B} = {84FE6A4D-2AF1-4E37-ABDC-2F8867533B20}
 		{AA45F728-EE3D-47F1-861F-98B0ED1B3714} = {84FE6A4D-2AF1-4E37-ABDC-2F8867533B20}
 		{6D37C1AF-30A5-4AC9-8766-39102D269718} = {D76F4234-A9B3-41D1-8E82-9840459E512C}
+		{F6E7F994-3262-4289-A543-BDED1C5611BD} = {84FE6A4D-2AF1-4E37-ABDC-2F8867533B20}
 	EndGlobalSection
 EndGlobal
