@@ -30,17 +30,31 @@ public class CryptocurrencyQuoteFetcher(
             return baseCurrencyErr;
         }
 
-        var (_, _, cryptocurrencyQuote, cryptocurrencyFailure) = await cryptocurrencyQuoteApiClient.GetCryptocurrencyQuote(
+        var cryptocurrencyQuoteTask = cryptocurrencyQuoteApiClient.GetCryptocurrencyQuote(
             searchQuery: new CryptocurrencyQuoteSearchQuery(symbol, BaseCurrency: baseCurrency),
             cancellationToken);
 
+        var currencyRatesTask = GetCurrencyRates(baseCurrency, cancellationToken);
+
+        await Task.WhenAll(cryptocurrencyQuoteTask, currencyRatesTask);
+
+        var (_, _, cryptocurrencyQuote, cryptocurrencyFailure) = await cryptocurrencyQuoteTask;
         if (cryptocurrencyFailure is not null)
         {
             return cryptocurrencyFailure;
         }
 
-        // TODO: run both requests parallel
+        var (_, _, exchangeRates, exchangeRatesFailure) = await currencyRatesTask;
+        if (exchangeRatesFailure is not null)
+        {
+            return exchangeRatesFailure;
+        }
 
+        return cryptocurrencyQuote.Apply(exchangeRates);
+    }
+
+    private Task<Result<CurrencyRates, Error>> GetCurrencyRates(CurrencySymbol baseCurrency, CancellationToken cancellationToken)
+    {
         var requiredCurrencies = settings.Value.RequiredCurrencies
             .Split(",", StringSplitOptions.RemoveEmptyEntries)
             .Distinct(StringComparer.InvariantCultureIgnoreCase)
@@ -51,11 +65,9 @@ public class CryptocurrencyQuoteFetcher(
             .Select(result => result.Value)
             .ToArray();
 
-        var (_, _, exchangeRates, exchangeRatesFailure) = await exchangeRatesApiClient.GetCurrencyRates(
+        return exchangeRatesApiClient.GetCurrencyRates(
             new GetCurrencyRatesQuery(baseCurrency, requiredCurrencies),
             cancellationToken);
-
-        return cryptocurrencyQuote.Apply(exchangeRates);
     }
 }
 
