@@ -30,6 +30,8 @@ public class CryptocurrencyQuoteFetcher(
             return baseCurrencyErr;
         }
 
+        // TODO: [Load-mitigation]: cache this call (into a distributed cache storage) for 5 minutes
+
         var cryptocurrencyQuoteTask = cryptocurrencyQuoteApiClient.GetCryptocurrencyQuote(
             searchQuery: new CryptocurrencyQuoteSearchQuery(symbol, BaseCurrency: baseCurrency),
             cancellationToken);
@@ -64,6 +66,11 @@ public class CryptocurrencyQuoteFetcher(
             .Where(result => result.IsSuccess)
             .Select(result => result.Value)
             .ToArray();
+
+
+        // TODO: [Load-mitigation]: currency rates stays the same for all cryptocurrencies =>
+        // (in BackgroundJob) we can easily cache them (into internal storage) every N minutes (or on a schedule) and share/reuse for all cryptocurrencies.
+        // And then here we would just fetch the data right from the cache (from internal storage)
 
         return exchangeRatesApiClient.GetCurrencyRates(
             new GetCurrencyRatesQuery(baseCurrency, requiredCurrencies),
