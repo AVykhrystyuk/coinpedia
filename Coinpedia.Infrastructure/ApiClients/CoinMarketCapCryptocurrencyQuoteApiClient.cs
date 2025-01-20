@@ -218,7 +218,7 @@ public class CoinMarketCapCryptocurrencyQuoteApiClient(
         public int? IsFiat { get; init; }
 
         [JsonPropertyName("self_reported_circulating_supply")]
-        public long? SelfReportedCirculatingSupply { get; init; }
+        public decimal? SelfReportedCirculatingSupply { get; init; }
 
         [JsonPropertyName("self_reported_market_cap")]
         public decimal? SelfReportedMarketCap { get; init; }
