@@ -93,7 +93,7 @@ public class ExchangeRatesApiClient(
 
                 var updatedAt = DateTimeOffset.FromUnixTimeSeconds(responseContent.UnixTimestamp).UtcDateTime;
 
-                return new CurrencyRates(ratePerCurrency, ratesQuery.BaseCurrency, updatedAt);
+                return new CurrencyRates(ratesQuery.BaseCurrency, ratePerCurrency, updatedAt);
             }
         }
         else // StatusCode is not successful

@@ -12,7 +12,7 @@ namespace Coinpedia.Core.Domain;
 
 public class CryptocurrencyQuoteFetcher(
     ICryptocurrencyQuoteApiClient cryptocurrencyQuoteApiClient,
-    ICurrencyRatesApiClient exchangeRatesApiClient,
+    ICurrencyRatesApiClient currencyRatesApiClient,
     IOptions<ICryptocurrencyQuoteFetcherSettings> settings,
     ILogger<CryptocurrencyQuoteFetcher> logger
 ) : ICryptocurrencyQuoteFetcher
@@ -46,13 +46,13 @@ public class CryptocurrencyQuoteFetcher(
             return cryptocurrencyFailure;
         }
 
-        var (_, _, exchangeRates, exchangeRatesFailure) = await currencyRatesTask;
-        if (exchangeRatesFailure is not null)
+        var (_, _, currencyRates, currencyRatesFailure) = await currencyRatesTask;
+        if (currencyRatesFailure is not null)
         {
-            return exchangeRatesFailure;
+            return currencyRatesFailure;
         }
 
-        return cryptocurrencyQuote.Apply(exchangeRates);
+        return cryptocurrencyQuote.Apply(currencyRates);
     }
 
     private Task<Result<CurrencyRates, Error>> GetCurrencyRates(CurrencySymbol baseCurrency, CancellationToken cancellationToken)
@@ -72,7 +72,7 @@ public class CryptocurrencyQuoteFetcher(
         // (in BackgroundJob) we can easily cache them (into internal storage) every N minutes (or on a schedule) and share/reuse for all cryptocurrencies.
         // And then here we would just fetch the data right from the cache (from internal storage)
 
-        return exchangeRatesApiClient.GetCurrencyRates(
+        return currencyRatesApiClient.GetCurrencyRates(
             new GetCurrencyRatesQuery(baseCurrency, requiredCurrencies),
             cancellationToken);
     }

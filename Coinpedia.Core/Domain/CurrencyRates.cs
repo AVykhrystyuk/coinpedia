@@ -1,6 +1,6 @@
 ﻿namespace Coinpedia.Core.Domain;
 
 public record CurrencyRates(
-    IReadOnlyDictionary<CurrencySymbol, decimal> RatePerCurrency,
     CurrencySymbol BaseCurrency,
+    IReadOnlyDictionary<CurrencySymbol, decimal> RatePerCurrency,
     DateTime UpdatedAt);

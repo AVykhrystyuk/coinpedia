@@ -7,7 +7,7 @@ using Coinpedia.Infrastructure.ApiClients;
 
 namespace Coinpedia.WebApi;
 
-public static class CoreDIExtensions
+public static class CoreInfrastructureExtensions
 {
     public static IServiceCollection AddCryptocurrencyQuoteApiClient(this IServiceCollection services)
     {

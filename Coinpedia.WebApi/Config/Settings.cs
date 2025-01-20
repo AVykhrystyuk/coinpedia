@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 using Coinpedia.Core.Domain;
 using Coinpedia.Infrastructure.ApiClients;
@@ -56,24 +56,20 @@ public static class SettingsExtensions
 {
     public static IServiceCollection AddSettings(this IServiceCollection services, IConfiguration configuration)
     {
-        services
-            .AddOptionsWithValidateOnStart<Settings>()
-            .Bind(configuration.GetSection(Settings.SectionKey))
-            .ValidateDataAnnotations();
+        services.Add<Settings>(Settings.SectionKey, configuration);
+        services.Add<SeqSettings>(SeqSettings.SectionKey, configuration);
+        services.Add<CoinMarketCapSettings>(CoinMarketCapSettings.SectionKey, configuration);
+        services.Add<ExchangeRatesSettings>(ExchangeRatesSettings.SectionKey, configuration);
 
-        services
-             .AddOptionsWithValidateOnStart<SeqSettings>()
-             .Bind(configuration.GetSection(SeqSettings.SectionKey))
-             .ValidateDataAnnotations();
+        return services;
+    }
 
+    private static IServiceCollection Add<T>(this IServiceCollection services, string sectionKey, IConfiguration configuration)
+        where T : class
+    {
         services
-            .AddOptionsWithValidateOnStart<CoinMarketCapSettings>()
-            .Bind(configuration.GetSection(CoinMarketCapSettings.SectionKey))
-            .ValidateDataAnnotations();
-
-        services
-            .AddOptionsWithValidateOnStart<ExchangeRatesSettings>()
-            .Bind(configuration.GetSection(ExchangeRatesSettings.SectionKey))
+            .AddOptionsWithValidateOnStart<T>()
+            .Bind(configuration.GetSection(sectionKey))
             .ValidateDataAnnotations();
 
         return services;
