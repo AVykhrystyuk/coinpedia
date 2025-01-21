@@ -107,9 +107,9 @@ public class ExchangeRatesApiClient(
             {
                 switch (errorFromContent.Code)
                 {
-                    case 104: // The maximum allowed API amount of monthly API requests has been reached.
+                    case ApiErrorCodes.MaximumMonthlyRequestsReached:
                         logger.Log(LogLevel.Critical, "[ER]: The maximum allowed API amount of monthly API requests has been reached.");
-                        return new InternalError { Message = "[ExchangeRatesApi]: The API rate limit was exceeded; consider slowing down your API Request frequency", Context = Context() };
+                        return new InternalError { Message = "[ExchangeRatesApi]: The maximum allowed API amount of monthly API requests has been reached.", Context = Context() };
                 }
             }
 
@@ -118,7 +118,7 @@ public class ExchangeRatesApiClient(
                 case HttpStatusCode.TooManyRequests:
                     return new TooManyRequests { Message = "[ExchangeRatesApi]: The API rate limit was exceeded; consider slowing down your API Request frequency", Context = Context() };
                 case var c:
-                    return new InternalError { Message = "Unexpected response", Context = NonSuccessfulContext(response.StatusCode) };
+                    return new InternalError { Message = "[ExchangeRatesApi]: Unexpected response", Context = NonSuccessfulContext(response.StatusCode) };
             }
         }
 
@@ -141,6 +141,14 @@ public class ExchangeRatesApiClient(
                     "[ER]: error-response deserialization failed. {errorMessage}, errorContext: {@context}", err.Message, err.Context)
                 );
 
+    }
+
+    private class ApiErrorCodes
+    {
+        /// <summary>
+        /// The maximum allowed API amount of monthly API requests has been reached
+        /// </summary>
+        public const int MaximumMonthlyRequestsReached = 104;
     }
 
     public class ResponseContent
