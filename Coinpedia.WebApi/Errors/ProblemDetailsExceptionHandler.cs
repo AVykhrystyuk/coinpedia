@@ -22,7 +22,7 @@ public class ProblemDetailsExceptionHandler(
         {
             Status = StatusCodes.Status500InternalServerError,
             Title = exception.Message,
-            Detail = exception.StackTrace,
+            Detail = exception.StackTrace, // TODO: hide for Production env
             Type = "InternalServerError"
         };
 

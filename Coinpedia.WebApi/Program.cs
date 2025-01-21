@@ -43,7 +43,7 @@ static void ConfigureServices(WebApplicationBuilder builder)
     builder.Services.AddScoped<CorrelationIdMiddleware>();
 
     builder.Services.AddCryptocurrencyQuoteApiClient();
-    builder.Services.AddExchangeRatesApiClient();
+    builder.Services.AddCurrencyRatesApiClient();
     builder.Services.AddCryptocurrencyQuoteFetcher();
 
     builder.Services.AddEndpointsApiExplorer();

@@ -1,4 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 
 using Coinpedia.Core.Errors;
@@ -37,7 +37,7 @@ public static class JsonSerializerEx
         {
             return new InternalError
             {
-                Message = "Failed to deserialize json",
+                Message = $"Failed to deserialize json: {ex.Message}",
                 Context = new { json, Type = typeof(TValue).FullName, ex.Path, ex.Message, ex.LineNumber },
                 Exception = ex,
             };
@@ -46,7 +46,7 @@ public static class JsonSerializerEx
         {
             return new InternalError
             {
-                Message = "Failed to deserialize json",
+                Message = $"Failed to deserialize json: {ex.Message}",
                 Context = new { json, Type = typeof(TValue).FullName },
                 Exception = ex,
             };

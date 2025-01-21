@@ -1,4 +1,4 @@
-﻿using Coinpedia.Core.ApiClients;
+using Coinpedia.Core.ApiClients;
 using Coinpedia.Core;
 using Coinpedia.WebApi.Config;
 using Microsoft.Extensions.Options;
@@ -24,7 +24,7 @@ public static class CoreInfrastructureExtensions
         return services;
     }
 
-    public static IServiceCollection AddExchangeRatesApiClient(this IServiceCollection services)
+    public static IServiceCollection AddCurrencyRatesApiClient(this IServiceCollection services)
     {
         services.AddTransient<IOptions<IExchangeRatesSettings>>(sp => sp.GetRequiredService<IOptions<ExchangeRatesSettings>>());
 
