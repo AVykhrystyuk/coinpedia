@@ -65,11 +65,7 @@ public class CryptocurrencyQuoteFetcher(
             .Select(result => result.Value)
             .ToArray();
 
-
-        // TODO: [Load-mitigation]: currency rates stays the same for all cryptocurrencies =>
-        // (in BackgroundJob) we can easily cache them (into internal storage) every N minutes (or on a schedule) and share/reuse for all cryptocurrencies.
-        // And then here we would just fetch the data right from the cache (from internal storage)
-
+        // NOTE: uses cache (decorated)
         return currencyRatesApiClient.GetCurrencyRates(
             new GetCurrencyRatesQuery(baseCurrency, requiredCurrencies),
             cancellationToken);
