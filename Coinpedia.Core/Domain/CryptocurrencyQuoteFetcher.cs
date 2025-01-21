@@ -3,8 +3,6 @@
 using Coinpedia.Core.ApiClients;
 using Coinpedia.Core.Errors;
 
-using CSharpFunctionalExtensions;
-
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 

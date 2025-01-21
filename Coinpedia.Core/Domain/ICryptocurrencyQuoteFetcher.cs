@@ -1,8 +1,6 @@
 ﻿using Coinpedia.Core.Domain;
 using Coinpedia.Core.Errors;
 
-using CSharpFunctionalExtensions;
-
 namespace Coinpedia.Core;
 
 public interface ICryptocurrencyQuoteFetcher

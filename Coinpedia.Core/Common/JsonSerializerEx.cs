@@ -1,9 +1,7 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 
 using Coinpedia.Core.Errors;
-
-using CSharpFunctionalExtensions;
 
 namespace Coinpedia.Core.Common;
 

@@ -1,7 +1,5 @@
 ﻿using Coinpedia.Core.Errors;
 
-using CSharpFunctionalExtensions;
-
 namespace Coinpedia.Core.Domain;
 
 public record CryptocurrencyQuote(

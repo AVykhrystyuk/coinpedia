@@ -3,8 +3,6 @@ using System.Text.Json.Serialization;
 
 using Coinpedia.Core.Errors;
 
-using CSharpFunctionalExtensions;
-
 namespace Coinpedia.Core.Domain;
 
 [JsonConverter(typeof(JsonConverter))]

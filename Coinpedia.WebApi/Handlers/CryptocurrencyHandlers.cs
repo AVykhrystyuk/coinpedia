@@ -3,8 +3,6 @@ using Coinpedia.Core.Domain;
 using Coinpedia.Core.Errors;
 using Coinpedia.WebApi.Logging;
 
-using CSharpFunctionalExtensions;
-
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 

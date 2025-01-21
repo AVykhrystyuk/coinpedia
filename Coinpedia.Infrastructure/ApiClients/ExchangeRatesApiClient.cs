@@ -7,8 +7,6 @@ using Coinpedia.Core.Common;
 using Coinpedia.Core.Domain;
 using Coinpedia.Core.Errors;
 
-using CSharpFunctionalExtensions;
-
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
