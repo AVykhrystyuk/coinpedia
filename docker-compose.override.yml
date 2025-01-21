@@ -13,6 +13,7 @@ services:
       - CoinMarketCap__ApiKey=${WebApi_CoinMarketCap__ApiKey}
       - ExchangeRates__BaseUrl=${WebApi_ExchangeRates__BaseUrl}
       - ExchangeRates__ApiKey=${WebApi_ExchangeRates__ApiKey}
+      - ExchangeRates__CacheDuration=${WebApi_ExchangeRates__CacheDuration}
   seq:
     environment:
       - SEQ_API_KEY=${WebApi_Seq__ApiKey}

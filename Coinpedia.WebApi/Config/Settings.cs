@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 using Coinpedia.Core.Domain;
 using Coinpedia.Infrastructure.ApiClients;
+using Coinpedia.Infrastructure.ApiClients.Decorators;
 
 namespace Coinpedia.WebApi.Config;
 
@@ -41,7 +42,7 @@ public class CoinMarketCapSettings
     public required string ApiKey { get; init; }
 }
 
-public class ExchangeRatesSettings : IExchangeRatesSettings
+public class ExchangeRatesSettings : IExchangeRatesSettings, ICurrencyRatesApiClientCacheSettings
 {
     public const string SectionKey = "ExchangeRates";
 
@@ -50,6 +51,12 @@ public class ExchangeRatesSettings : IExchangeRatesSettings
 
     [Required]
     public required string ApiKey { get; init; }
+
+    [Required]
+    [RegularExpression("(?<days>\\d+):(?<hours>[0-1]?\\d|2[0-3]):(?<minutes>[0-5]?\\d):(?<seconds>[0-5]?\\d)")]
+    public required string CacheDuration { get; init; }
+
+    TimeSpan ICurrencyRatesApiClientCacheSettings.CacheDuration => TimeSpan.Parse(CacheDuration);
 }
 
 public static class SettingsExtensions

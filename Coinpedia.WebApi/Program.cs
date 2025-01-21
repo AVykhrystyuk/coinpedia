@@ -42,6 +42,8 @@ static void ConfigureServices(WebApplicationBuilder builder)
     builder.Services.AddSerilog((services, loggerConfig) => loggerConfig.Configure(builder, services));
     builder.Services.AddScoped<CorrelationIdMiddleware>();
 
+    builder.Services.AddCache();
+
     builder.Services.AddCryptocurrencyQuoteApiClient();
     builder.Services.AddCurrencyRatesApiClient();
     builder.Services.AddCryptocurrencyQuoteFetcher();

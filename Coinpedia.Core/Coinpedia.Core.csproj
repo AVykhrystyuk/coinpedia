@@ -2,5 +2,6 @@
   <ItemGroup>
     <PackageReference Include="CSharpFunctionalExtensions" Version="3.4.3" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.1" />
+    <PackageReference Include="ZiggyCreatures.FusionCache" Version="2.0.0" />
   </ItemGroup>
 </Project>

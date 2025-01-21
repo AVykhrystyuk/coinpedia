@@ -1,9 +1,11 @@
-using Coinpedia.Core.ApiClients;
+﻿using Coinpedia.Core.ApiClients;
 using Coinpedia.Core;
 using Coinpedia.WebApi.Config;
 using Microsoft.Extensions.Options;
 using Coinpedia.Core.Domain;
 using Coinpedia.Infrastructure.ApiClients;
+using Coinpedia.Infrastructure.ApiClients.Decorators;
+using ZiggyCreatures.Caching.Fusion;
 
 namespace Coinpedia.WebApi;
 
@@ -28,15 +30,23 @@ public static class CoreInfrastructureExtensions
     {
         services.AddTransient<IOptions<IExchangeRatesSettings>>(sp => sp.GetRequiredService<IOptions<ExchangeRatesSettings>>());
 
-        services.AddScoped<ICurrencyRatesApiClient, ExchangeRatesApiClient>();
+        services.AddScoped<ExchangeRatesApiClient>();
 
-        services.AddHttpClient<ICurrencyRatesApiClient, ExchangeRatesApiClient>((sp, client) =>
+        services.AddHttpClient<ExchangeRatesApiClient>((sp, client) =>
         {
             var settings = sp.GetRequiredService<IOptions<ExchangeRatesSettings>>().Value;
             client.DefaultRequestHeaders.Add("X-Coinpedia-Correlation-ID", CorrelationId.Value);
             // ApiKey is passed through queryString
             client.BaseAddress = new Uri(settings.BaseUrl);
         }).AddPolicyHandler(HttpRetryPolicies.Default());
+
+        services.AddTransient<IOptions<ICurrencyRatesApiClientCacheSettings>>(sp => sp.GetRequiredService<IOptions<ExchangeRatesSettings>>());
+
+        services.AddScoped<ICurrencyRatesApiClient, CurrencyRatesApiClientCacheDecorator>(sp => new CurrencyRatesApiClientCacheDecorator(
+            apiClient: sp.GetRequiredService<ExchangeRatesApiClient>(),
+            cache: sp.GetRequiredService<IFusionCache>(),
+            settings: sp.GetRequiredService<IOptions<ICurrencyRatesApiClientCacheSettings>>()
+        ));
 
         return services;
     }
@@ -45,6 +55,19 @@ public static class CoreInfrastructureExtensions
     {
         services.AddTransient<IOptions<ICryptocurrencyQuoteFetcherSettings>>(sp => sp.GetRequiredService<IOptions<Settings>>());
         services.AddScoped<ICryptocurrencyQuoteFetcher, CryptocurrencyQuoteFetcher>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddCache(this IServiceCollection services)
+    {
+        services.AddMemoryCache();
+        services.AddFusionCache()
+            .WithDefaultEntryOptions(new FusionCacheEntryOptions
+            {
+                // CACHE DURATION
+                Duration = TimeSpan.FromMinutes(5)
+            });
 
         return services;
     }
