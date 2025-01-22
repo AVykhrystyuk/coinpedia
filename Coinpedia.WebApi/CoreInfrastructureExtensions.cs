@@ -1,10 +1,15 @@
-﻿using Coinpedia.Core.ApiClients;
-using Coinpedia.Core;
-using Coinpedia.WebApi.Config;
-using Microsoft.Extensions.Options;
+﻿using Coinpedia.Core;
+using Coinpedia.Core.ApiClients;
 using Coinpedia.Core.Domain;
 using Coinpedia.Infrastructure.ApiClients;
 using Coinpedia.Infrastructure.ApiClients.Decorators;
+using Coinpedia.WebApi.Config;
+
+using Microsoft.Extensions.Caching.StackExchangeRedis;
+using Microsoft.Extensions.Options;
+
+using StackExchange.Redis;
+
 using ZiggyCreatures.Caching.Fusion;
 
 namespace Coinpedia.WebApi;
@@ -45,7 +50,8 @@ public static class CoreInfrastructureExtensions
         services.AddScoped<ICurrencyRatesApiClient, CurrencyRatesApiClientCacheDecorator>(sp => new CurrencyRatesApiClientCacheDecorator(
             apiClient: sp.GetRequiredService<ExchangeRatesApiClient>(),
             cache: sp.GetRequiredService<IFusionCache>(),
-            settings: sp.GetRequiredService<IOptions<ICurrencyRatesApiClientCacheSettings>>()
+            settings: sp.GetRequiredService<IOptions<ICurrencyRatesApiClientCacheSettings>>(),
+            logger: sp.GetRequiredService<ILogger<CurrencyRatesApiClientCacheDecorator>>()
         ));
 
         return services;
@@ -59,15 +65,28 @@ public static class CoreInfrastructureExtensions
         return services;
     }
 
-    public static IServiceCollection AddCache(this IServiceCollection services)
+    public static IServiceCollection AddCache(this IServiceCollection services, IConfiguration configuration)
     {
+        var redisSettings = configuration.GetSection(RedisSettings.SectionKey).Get<RedisSettings>()
+            ?? throw new Exception($"{RedisSettings.SectionKey} configuration section is missing");
+
         services.AddMemoryCache();
         services.AddFusionCache()
             .WithDefaultEntryOptions(new FusionCacheEntryOptions
             {
-                // CACHE DURATION
-                Duration = TimeSpan.FromMinutes(5)
-            });
+                Duration = TimeSpan.FromMinutes(5),
+                JitterMaxDuration = TimeSpan.FromSeconds(0.5)
+            })
+            .WithSystemTextJsonSerializer()
+            .WithDistributedCache(
+                new RedisCache(new RedisCacheOptions
+                {
+                    ConfigurationOptions = new ConfigurationOptions
+                    {
+                        EndPoints = { redisSettings.ConnectionString }
+                    }
+                })
+            );
 
         return services;
     }

@@ -28,7 +28,7 @@ public class CryptocurrencyQuoteFetcher(
             return baseCurrencyErr;
         }
 
-        // TODO: [Load-mitigation]: cache this call (into a distributed cache storage) for 5 minutes
+        // TODO: [Load-mitigation]: cache this call (into a distributed cache storage) for 5 minutes. LRU cache? since there are so many different cryptocurrencies
 
         var cryptocurrencyQuoteTask = cryptocurrencyQuoteApiClient.GetCryptocurrencyQuote(
             searchQuery: new CryptocurrencyQuoteSearchQuery(symbol, BaseCurrency: baseCurrency),

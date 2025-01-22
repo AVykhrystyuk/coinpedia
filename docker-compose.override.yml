@@ -1,4 +1,5 @@
 services:
+
   webapi:
     build:
       context: .
@@ -14,6 +15,8 @@ services:
       - ExchangeRates__BaseUrl=${WebApi_ExchangeRates__BaseUrl}
       - ExchangeRates__ApiKey=${WebApi_ExchangeRates__ApiKey}
       - ExchangeRates__CacheDuration=${WebApi_ExchangeRates__CacheDuration}
+      - Redis__ConnectionString=${WebApi_Redis__ConnectionString}
+
   seq:
     environment:
       - SEQ_API_KEY=${WebApi_Seq__ApiKey}

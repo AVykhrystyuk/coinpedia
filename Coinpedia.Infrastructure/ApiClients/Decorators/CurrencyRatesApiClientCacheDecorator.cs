@@ -2,6 +2,7 @@ using Coinpedia.Core.ApiClients;
 using Coinpedia.Core.Domain;
 using Coinpedia.Core.Errors;
 
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using ZiggyCreatures.Caching.Fusion;
@@ -11,7 +12,8 @@ namespace Coinpedia.Infrastructure.ApiClients.Decorators;
 public class CurrencyRatesApiClientCacheDecorator(
     ICurrencyRatesApiClient apiClient,
     IFusionCache cache,
-    IOptions<ICurrencyRatesApiClientCacheSettings> settings
+    IOptions<ICurrencyRatesApiClientCacheSettings> settings,
+    ILogger<CurrencyRatesApiClientCacheDecorator> logger
 ) : ICurrencyRatesApiClient
 {
     public async Task<Result<CurrencyRates, Error>> GetCurrencyRates(GetCurrencyRatesQuery ratesQuery, CancellationToken cancellationToken = default)
@@ -21,6 +23,8 @@ public class CurrencyRatesApiClientCacheDecorator(
         var cachedCurrencyRates = cache.GetOrDefault<CurrencyRates>(cacheKey, token: cancellationToken);
         if (cachedCurrencyRates is not null)
         {
+            logger.LogInformation("[Cache]: Currency rates are found in and returned from the cache, {cacheKey}", cacheKey);
+
             return cachedCurrencyRates;
         }
 

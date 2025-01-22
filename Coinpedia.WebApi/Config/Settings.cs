@@ -59,6 +59,14 @@ public class ExchangeRatesSettings : IExchangeRatesSettings, ICurrencyRatesApiCl
     TimeSpan ICurrencyRatesApiClientCacheSettings.CacheDuration => TimeSpan.Parse(CacheDuration);
 }
 
+public class RedisSettings
+{
+    public const string SectionKey = "Redis";
+
+    [Required]
+    public required string ConnectionString { get; init; }
+}
+
 public static class SettingsExtensions
 {
     public static IServiceCollection AddSettings(this IServiceCollection services, IConfiguration configuration)
@@ -67,6 +75,7 @@ public static class SettingsExtensions
         services.Add<SeqSettings>(SeqSettings.SectionKey, configuration);
         services.Add<CoinMarketCapSettings>(CoinMarketCapSettings.SectionKey, configuration);
         services.Add<ExchangeRatesSettings>(ExchangeRatesSettings.SectionKey, configuration);
+        services.Add<RedisSettings>(RedisSettings.SectionKey, configuration);
 
         return services;
     }
