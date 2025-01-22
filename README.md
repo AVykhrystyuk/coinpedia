@@ -28,7 +28,7 @@ The code compiles and runs in one step (see below)
 | Feature    | Basic plan |
 | -------- | ------- |
 | Rate limit | 30 Requests per minute |
-| Monthly API credits | 10,000 per month |
+| Monthly API credits/calls | 10,000 per month |
 
 
 - [exchangeratesapi.io](https://manage.exchangeratesapi.io/plan)
