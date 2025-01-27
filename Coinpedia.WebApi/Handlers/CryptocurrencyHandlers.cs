@@ -1,4 +1,4 @@
-﻿using Coinpedia.Core;
+using Coinpedia.Core;
 using Coinpedia.Core.Domain;
 using Coinpedia.Core.Errors;
 using Coinpedia.WebApi.Logging;
@@ -31,7 +31,7 @@ public static class CryptocurrencyHandlers
         [FromServices] IDiagnosticContext diagnosticContext,
         CancellationToken cancellationToken)
     {
-        using var _ = logger.BeginAttributesScope(symbolRaw, arg1Name: "symbol");
+        using var _ = logger.BeginAttributedScope(symbolRaw, arg1Name: "symbol");
 
         var (_, _, symbol, err) = CryptocurrencySymbol.TryCreate(symbolRaw);
         if (err is not null)

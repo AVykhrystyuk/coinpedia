@@ -28,7 +28,7 @@ public class CoinMarketCapCryptocurrencyQuoteApiClient(
             $"&symbol={searchQuery.Cryptocurrency}" +
             $"&aux=date_added,platform,is_active,is_fiat";
 
-        using var _ = logger.BeginAttributesScope(url, searchQuery);
+        using var _ = logger.BeginAttributedScope(url, searchQuery);
 
         HttpResponseMessage response;
         string responseContentAsText;
@@ -69,7 +69,7 @@ public class CoinMarketCapCryptocurrencyQuoteApiClient(
             {
                 var cryptocurrenciesPerSymbol = responseContent.CryptocurrencyDataPerSymbol!;
 
-                using var _1 = logger.BeginAttributesScope(cryptocurrenciesPerSymbol.Count);
+                using var _1 = logger.BeginAttributedScope(cryptocurrenciesPerSymbol.Count);
 
                 if (cryptocurrenciesPerSymbol.Count < 1)
                 {
@@ -88,7 +88,7 @@ public class CoinMarketCapCryptocurrencyQuoteApiClient(
                     return new None { Message = "[CryptocurrencyApi]: Unexpected response - cannot find cryptocurrencyData for requested symbol", Context = Context() };
                 }
 
-                using var _2 = logger.BeginAttributesScope(cryptocurrencies.Count);
+                using var _2 = logger.BeginAttributedScope(cryptocurrencies.Count);
 
                 if (cryptocurrencies.Count < 1)
                 {
@@ -97,7 +97,7 @@ public class CoinMarketCapCryptocurrencyQuoteApiClient(
                 }
 
                 var highestMarketCapCryptocurrency = cryptocurrencies.First();
-                using var _3 = logger.BeginAttributesScope(highestMarketCapCryptocurrency.Id, highestMarketCapCryptocurrency.Name);
+                using var _3 = logger.BeginAttributedScope(highestMarketCapCryptocurrency.Id, highestMarketCapCryptocurrency.Name);
 
                 if (cryptocurrencies.Count > 1)
                 {
@@ -107,7 +107,7 @@ public class CoinMarketCapCryptocurrencyQuoteApiClient(
 
                 var quotePerCurrency = highestMarketCapCryptocurrency.QuotePerCurrency;
 
-                using var _4 = logger.BeginAttributesScope(quotePerCurrency.Count);
+                using var _4 = logger.BeginAttributedScope(quotePerCurrency.Count);
 
                 if (quotePerCurrency.Count < 1)
                 {

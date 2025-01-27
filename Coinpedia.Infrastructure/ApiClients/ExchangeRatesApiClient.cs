@@ -37,7 +37,7 @@ public class ExchangeRatesApiClient(
             $"&symbols={string.Join(",", currencies)}" +
             $"&base={ratesQuery.BaseCurrency}";
 
-        using var _ = logger.BeginAttributesScope(url, ratesQuery);
+        using var _ = logger.BeginAttributedScope(url, ratesQuery);
 
         HttpResponseMessage response;
         string responseContentAsText;

@@ -6,7 +6,7 @@ namespace Coinpedia.Core;
 
 public static class LoggerExtensions
 {
-    public static IDisposable? BeginAttributesScope(
+    public static IDisposable? BeginAttributedScope(
         this ILogger logger,
         object? expr1 = null,
         object? expr2 = null,

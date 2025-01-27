@@ -20,7 +20,7 @@ public class CryptocurrencyQuoteFetcher(
         CancellationToken cancellationToken
     )
     {
-        using var _ = logger.BeginAttributesScope(settings.Value);
+        using var _ = logger.BeginAttributedScope(settings.Value);
 
         var (_, _, baseCurrency, baseCurrencyErr) = CurrencySymbol.TryCreate(settings.Value.BaseCurrency);
         if (baseCurrencyErr is not null)
