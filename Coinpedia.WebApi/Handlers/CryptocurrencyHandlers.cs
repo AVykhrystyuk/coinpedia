@@ -1,4 +1,4 @@
-using Coinpedia.Core;
+﻿using Coinpedia.Core;
 using Coinpedia.Core.Domain;
 using Coinpedia.Core.Errors;
 using Coinpedia.WebApi.Logging;
@@ -24,7 +24,7 @@ public static class CryptocurrencyHandlers
         return builder;
     }
 
-    public static async Task<Results<Ok<MultiCurrencyCryptocurrencyQuotes>, JsonHttpResult<Error>>> GetLatestQuote(
+    public static async Task<Results<Ok<MultiCurrencyCryptocurrencyQuotesDto>, JsonHttpResult<Error>>> GetLatestQuote(
         [FromRoute(Name = "symbol")] string symbolRaw,
         [FromServices] ICryptocurrencyQuoteFetcher cryptocurrencyQuoteFetcher,
         [FromServices] ILogger<Logs> logger,
@@ -42,7 +42,7 @@ public static class CryptocurrencyHandlers
         var searchResult = await cryptocurrencyQuoteFetcher.FetchCryptocurrencyQuote(symbol, cancellationToken);
         if (searchResult.IsSuccess)
         {
-            return TypedResults.Ok(searchResult.Value); // TODO: output as a DTO?
+            return TypedResults.Ok(searchResult.Value.ToDto());
         }
         else // Failure
         {
@@ -64,4 +64,18 @@ public static class CryptocurrencyHandlers
         static JsonHttpResult<Error> Json(Error error, int statusCode) =>
             TypedResults.Json(error, statusCode: statusCode);
     }
+
+    public record MultiCurrencyCryptocurrencyQuotesDto(
+        string Cryptocurrency,
+        DateTime CryptocurrencyUpdatedAt,
+        DateTime CurrencyRatesUpdatedAt,
+        IReadOnlyDictionary<string, decimal> PricePerCurrency,
+        string BaseCurrency);
+
+    private static MultiCurrencyCryptocurrencyQuotesDto ToDto(this MultiCurrencyCryptocurrencyQuotes quotes) =>
+        new(quotes.Cryptocurrency.Value,
+            quotes.CryptocurrencyUpdatedAt,
+            quotes.CurrencyRatesUpdatedAt,
+            quotes.PricePerCurrency.ToDictionary(p => p.Key.Value, p => p.Value),
+            quotes.BaseCurrency.Value);
 }
