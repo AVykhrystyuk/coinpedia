@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Text.Json.Serialization;
 
 using Coinpedia.Core;
@@ -6,6 +6,7 @@ using Coinpedia.Core.ApiClients;
 using Coinpedia.Core.Common;
 using Coinpedia.Core.Domain;
 using Coinpedia.Core.Errors;
+using Coinpedia.Infrastructure.ApiClients.JsonConverters;
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -116,7 +117,7 @@ public class ExchangeRatesApiClient(
                 case HttpStatusCode.TooManyRequests:
                     return new TooManyRequests { Message = "[ExchangeRatesApi]: The API rate limit was exceeded; consider slowing down your API Request frequency", Context = Context() };
                 case var c:
-                    return new InternalError { Message = "[ExchangeRatesApi]: Unexpected response", Context = NonSuccessfulContext(response.StatusCode) };
+                    return new InternalError { Message = "[ExchangeRatesApi]: Unexpected response. For more info contact the support", Context = NonSuccessfulContext(response.StatusCode) };
             }
         }
 
@@ -128,7 +129,7 @@ public class ExchangeRatesApiClient(
                 .TapError(err => logger.Log(
                     LogLevel.Critical,
                     err.Exception,
-                    "[ER]: response deserialization failed. {errorMessage}, errorContext: {@context}", err.Message, err.Context)
+                    "[ER]: response deserialization failed. {errorMessage}, errorContext: {@context}, {json}", err.Message, err.Context, json)
                 );
 
         static Result<ErrorResponseContent, Error> DeserializeErrorResponseContent(string json, ILogger logger) =>
@@ -136,7 +137,7 @@ public class ExchangeRatesApiClient(
                 .TapError(err => logger.Log(
                     LogLevel.Critical,
                     err.Exception,
-                    "[ER]: error-response deserialization failed. {errorMessage}, errorContext: {@context}", err.Message, err.Context)
+                    "[ER]: error-response deserialization failed. {errorMessage}, errorContext: {@context}, {json}", err.Message, err.Context, json)
                 );
 
     }
@@ -167,10 +168,10 @@ public class ExchangeRatesApiClient(
     public class ErrorResponseContent
     {
         [JsonPropertyName("success")]
-        public required bool? Success { get; init; }
+        public bool? Success { get; init; }
 
         [JsonPropertyName("error")]
-        public required ErrorDetails? Error { get; init; }
+        public ErrorDetails? Error { get; init; }
 
         public class ErrorDetails
         {
@@ -189,6 +190,7 @@ public class ExchangeRatesApiClient(
                   }
                 }
              */
+            [JsonConverter(typeof(ObjectStringOrNumberConverter))]
             [JsonPropertyName("code")]
             public required object Code { get; init; }
 

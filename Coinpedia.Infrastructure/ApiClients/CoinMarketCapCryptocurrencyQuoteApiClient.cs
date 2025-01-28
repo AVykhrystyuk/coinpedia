@@ -102,7 +102,7 @@ public class CoinMarketCapCryptocurrencyQuoteApiClient(
                 if (cryptocurrencies.Count > 1)
                 {
                     var cryptocurrencyNames = cryptocurrencies.Select(c => c.Name).ToArray();
-                    logger.LogWarning("[CMC]: More than one cryptocurrencies are found for the symbol. Going to use the cryptocurrency with the highest market cap.");
+                    logger.LogWarning("[CMC]: More than one cryptocurrencies are found for the symbol. Using the cryptocurrency with the highest market cap.");
                 }
 
                 var quotePerCurrency = highestMarketCapCryptocurrency.QuotePerCurrency;
@@ -144,9 +144,9 @@ public class CoinMarketCapCryptocurrencyQuoteApiClient(
                     return new TooManyRequests { Message = "[CryptocurrencyApi]: The API rate limit was exceeded; consider slowing down your API Request frequency", Context = Context() };
                 case HttpStatusCode.PaymentRequired:
                     logger.Log(LogLevel.Critical, "[CMC]: API request was rejected due to it being a paid subscription plan with an overdue balance");
-                    return new InternalError { Message = "[CryptocurrencyApi]: Unexpected response", Context = Context() };
+                    return new InternalError { Message = "[CryptocurrencyApi]: Unexpected response. For more info contact the support", Context = Context() };
                 case var c:
-                    return new InternalError { Message = "[CryptocurrencyApi]: Unexpected response", Context = NonSuccessfulContext(response.StatusCode) };
+                    return new InternalError { Message = "[CryptocurrencyApi]: Unexpected response. For more info contact the support", Context = NonSuccessfulContext(response.StatusCode) };
             }
         }
 

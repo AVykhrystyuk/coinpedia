@@ -20,14 +20,16 @@ public class CurrencyRatesApiClientCacheDecorator(
     public async Task<Result<CurrencyRates, Error>> GetCurrencyRates(GetCurrencyRatesQuery ratesQuery, CancellationToken cancellationToken = default)
     {
         var cacheKey = $"currency-rates:{ratesQuery.BaseCurrency}";
+        var tags = new[] { ratesQuery.BaseCurrency.Value };
+        var cacheDuration = settings.Value.CacheDuration;
 
         var factoryGotCalled = false;
 
         var currencyRates = await cache.GetResultOrSetValueAsync<CurrencyRates, Error>(
             key: cacheKey,
             factory: Factory,
-            setupAction: options => options.SetDuration(settings.Value.CacheDuration),
-            tags: [ratesQuery.BaseCurrency.Value],
+            setupAction: options => options.SetDuration(cacheDuration),
+            tags: tags,
             token: cancellationToken
         );
 
