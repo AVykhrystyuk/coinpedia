@@ -1,5 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
+  
+  <ItemGroup>
+    <PackageReference Include="ZiggyCreatures.FusionCache" Version="2.0.0" />
+  </ItemGroup>
+  
   <ItemGroup>
     <ProjectReference Include="..\Coinpedia.Core\Coinpedia.Core.csproj" />
   </ItemGroup>

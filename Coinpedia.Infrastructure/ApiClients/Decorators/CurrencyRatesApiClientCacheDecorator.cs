@@ -1,6 +1,7 @@
-using Coinpedia.Core.ApiClients;
+﻿using Coinpedia.Core.ApiClients;
 using Coinpedia.Core.Domain;
 using Coinpedia.Core.Errors;
+using Coinpedia.Infrastructure.Cache;
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -20,28 +21,29 @@ public class CurrencyRatesApiClientCacheDecorator(
     {
         var cacheKey = $"currency-rates:{ratesQuery.BaseCurrency}";
 
-        var cachedCurrencyRates = cache.GetOrDefault<CurrencyRates>(cacheKey, token: cancellationToken);
-        if (cachedCurrencyRates is not null)
-        {
-            logger.LogInformation("[Cache]: Currency rates are found in and returned from the cache, {cacheKey}", cacheKey);
+        var factoryGotCalled = false;
 
-            return cachedCurrencyRates;
-        }
-
-        var (_, _, currencyRates, error) = await apiClient.GetCurrencyRates(ratesQuery, cancellationToken);
-        if (error is not null)
-        {
-            return error;
-        }
-
-        await cache.SetAsync(
-            cacheKey,
-            currencyRates,
-            options => options.SetDuration(settings.Value.CacheDuration),
+        var currencyRates = await cache.GetResultOrSetValueAsync<CurrencyRates, Error>(
+            key: cacheKey,
+            factory: Factory,
+            setupAction: options => options.SetDuration(settings.Value.CacheDuration),
+            tags: [ratesQuery.BaseCurrency.Value],
             token: cancellationToken
         );
 
+        if (!factoryGotCalled)
+        {
+            logger.LogInformation("[Cache]: Currency rates are found in and returned from the cache, {cacheKey}", cacheKey);
+        }
+
         return currencyRates;
+
+        async Task<Result<CurrencyRates, Error>> Factory(FusionCacheFactoryExecutionContext<CurrencyRates> context, CancellationToken token)
+        {
+            factoryGotCalled = true;
+
+            return await apiClient.GetCurrencyRates(ratesQuery, token);
+        }
     }
 }
 
@@ -49,4 +51,3 @@ public interface ICurrencyRatesApiClientCacheSettings
 {
     TimeSpan CacheDuration { get; }
 }
-

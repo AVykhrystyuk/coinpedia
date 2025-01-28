@@ -1,4 +1,4 @@
-﻿using Coinpedia.Core;
+using Coinpedia.Core;
 using Coinpedia.Core.ApiClients;
 using Coinpedia.Core.Domain;
 using Coinpedia.Infrastructure.ApiClients;
@@ -74,7 +74,7 @@ public static class CoreInfrastructureExtensions
         services.AddFusionCache()
             .WithDefaultEntryOptions(new FusionCacheEntryOptions
             {
-                Duration = TimeSpan.FromMinutes(5),
+                Duration = TimeSpan.FromMinutes(1),
                 JitterMaxDuration = TimeSpan.FromSeconds(0.5)
             })
             .WithSystemTextJsonSerializer()
