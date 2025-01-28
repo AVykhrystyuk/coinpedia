@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Text.Json.Serialization;
 
 using Coinpedia.Core;
@@ -34,11 +34,12 @@ public class ExchangeRatesApiClient(
             .ToList();
 
         var url = $"/v1/latest" +
-            $"?access_key={apiKey}" +
-            $"&symbols={string.Join(",", currencies)}" +
-            $"&base={ratesQuery.BaseCurrency}";
+            $"?base={ratesQuery.BaseCurrency}" +
+            $"&symbols={string.Join(",", currencies)}";
 
         using var _ = logger.BeginAttributedScope(url, ratesQuery);
+
+        url += $"&access_key={apiKey}"; // to avoid logging access_key
 
         HttpResponseMessage response;
         string responseContentAsText;
