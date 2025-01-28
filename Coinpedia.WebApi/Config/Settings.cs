@@ -31,7 +31,7 @@ public class SeqSettings
     public required string IngestionUrl { get; init; }
 }
 
-public class CoinMarketCapSettings
+public class CoinMarketCapSettings : ICryptocurrencyQuoteApiClientCacheSettings
 {
     public const string SectionKey = "CoinMarketCap";
 
@@ -40,6 +40,12 @@ public class CoinMarketCapSettings
 
     [Required]
     public required string ApiKey { get; init; }
+
+    [Required]
+    [RegularExpression("(?<days>\\d+):(?<hours>[0-1]?\\d|2[0-3]):(?<minutes>[0-5]?\\d):(?<seconds>[0-5]?\\d)")]
+    public required string CacheDuration { get; init; }
+
+    TimeSpan ICryptocurrencyQuoteApiClientCacheSettings.CacheDuration => TimeSpan.Parse(CacheDuration);
 }
 
 public class ExchangeRatesSettings : IExchangeRatesSettings, ICurrencyRatesApiClientCacheSettings

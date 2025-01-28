@@ -35,7 +35,7 @@ public class CurrencyRatesApiClientCacheDecorator(
 
         if (!factoryGotCalled)
         {
-            logger.LogInformation("[Cache]: Currency rates are found in and returned from the cache, {cacheKey}", cacheKey);
+            logger.LogInformation("[Cache]: Currency rates are found in (and returned from) the cache, {cacheKey}", cacheKey);
         }
 
         return currencyRates;

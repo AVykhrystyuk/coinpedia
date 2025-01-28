@@ -12,6 +12,7 @@ services:
       - Seq__IngestionUrl=${WebApi_Seq__IngestionUrl}
       - CoinMarketCap__BaseUrl=${WebApi_CoinMarketCap__BaseUrl}
       - CoinMarketCap__ApiKey=${WebApi_CoinMarketCap__ApiKey}
+      - CoinMarketCap__CacheDuration=${WebApi_CoinMarketCap__CacheDuration}
       - ExchangeRates__BaseUrl=${WebApi_ExchangeRates__BaseUrl}
       - ExchangeRates__ApiKey=${WebApi_ExchangeRates__ApiKey}
       - ExchangeRates__CacheDuration=${WebApi_ExchangeRates__CacheDuration}

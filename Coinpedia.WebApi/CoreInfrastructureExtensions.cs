@@ -18,15 +18,24 @@ public static class CoreInfrastructureExtensions
 {
     public static IServiceCollection AddCryptocurrencyQuoteApiClient(this IServiceCollection services)
     {
-        services.AddScoped<ICryptocurrencyQuoteApiClient, CoinMarketCapCryptocurrencyQuoteApiClient>();
+        services.AddScoped<CoinMarketCapCryptocurrencyQuoteApiClient>();
 
-        services.AddHttpClient<ICryptocurrencyQuoteApiClient, CoinMarketCapCryptocurrencyQuoteApiClient>((sp, client) =>
+        services.AddHttpClient<CoinMarketCapCryptocurrencyQuoteApiClient>((sp, client) =>
         {
             var settings = sp.GetRequiredService<IOptions<CoinMarketCapSettings>>().Value;
             client.DefaultRequestHeaders.Add("X-Coinpedia-Correlation-ID", CorrelationId.Value);
             client.DefaultRequestHeaders.Add("X-CMC_PRO_API_KEY", settings.ApiKey);
             client.BaseAddress = new Uri(settings.BaseUrl);
         }).AddPolicyHandler(HttpRetryPolicies.Default());
+
+        services.AddTransient<IOptions<ICryptocurrencyQuoteApiClientCacheSettings>>(sp => sp.GetRequiredService<IOptions<CoinMarketCapSettings>>());
+
+        services.AddScoped<ICryptocurrencyQuoteApiClient, CryptocurrencyQuoteApiClientCacheDecorator>(sp => new CryptocurrencyQuoteApiClientCacheDecorator(
+            apiClient: sp.GetRequiredService<CoinMarketCapCryptocurrencyQuoteApiClient>(),
+            cache: sp.GetRequiredService<IFusionCache>(),
+            settings: sp.GetRequiredService<IOptions<ICryptocurrencyQuoteApiClientCacheSettings>>(),
+            logger: sp.GetRequiredService<ILogger<CryptocurrencyQuoteApiClientCacheDecorator>>()
+        ));
 
         return services;
     }
