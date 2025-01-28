@@ -72,6 +72,11 @@ public static class CoreInfrastructureExtensions
 
         services.AddMemoryCache();
         services.AddFusionCache()
+            .WithOptions(options =>
+            {
+                options.FactorySyntheticTimeoutsLogLevel = LogLevel.Debug; // most likely will be ignored
+                options.FactoryErrorsLogLevel = LogLevel.Error;
+            })
             .WithDefaultEntryOptions(new FusionCacheEntryOptions
             {
                 Duration = TimeSpan.FromMinutes(1),

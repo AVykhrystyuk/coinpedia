@@ -47,7 +47,9 @@ public static class FusionCacheExtensions
         }
     }
 
-    private class FusionCacheFactoryInterruptedException<TValue, TError>() : Exception
+    // HACK: inheriting from SyntheticTimeoutException helps to skip logging of our custom exception
+    // for more details find "ProcessFactoryError" method in the source code: https://github.com/ZiggyCreatures/FusionCache/blob/707b594ab4ea3e44e4ee93ee545c8cf21bcc070c/src/ZiggyCreatures.FusionCache/FusionCache.cs#L583
+    private class FusionCacheFactoryInterruptedException<TValue, TError>() : SyntheticTimeoutException
         where TValue : notnull
     {
         public required Result<TValue, TError> FailedResult { get; init; }
