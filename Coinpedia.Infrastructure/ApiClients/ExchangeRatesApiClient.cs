@@ -29,13 +29,18 @@ public class ExchangeRatesApiClient(
     {
         var apiKey = settings.Value.ApiKey;
 
-        var currencies = ratesQuery.ForCurrencies
+        var uniqueCurrencies = ratesQuery.ForCurrencies
             .DistinctBy(c => c.Value)
             .ToList();
 
+        if (uniqueCurrencies.Count != ratesQuery.ForCurrencies.Count)
+        {
+            ratesQuery = ratesQuery with { ForCurrencies = uniqueCurrencies };
+        }
+
         var url = $"/v1/latest" +
             $"?base={ratesQuery.BaseCurrency}" +
-            $"&symbols={string.Join(",", currencies)}";
+            $"&symbols={string.Join(",", ratesQuery.ForCurrencies)}";
 
         using var _ = logger.BeginAttributedScope(url, ratesQuery);
 
@@ -74,27 +79,7 @@ public class ExchangeRatesApiClient(
             }
 
             return DeserializeResponseContent(responseContentAsText, logger)
-                .Bind(ToCurrencyRates);
-
-            Result<CurrencyRates, Error> ToCurrencyRates(ResponseContent responseContent)
-            {
-                var ratePerCurrency = new Dictionary<CurrencySymbol, decimal>();
-
-                foreach (var currency in currencies)
-                {
-                    if (!responseContent.Rates.TryGetValue(currency.Value, out var rate))
-                    {
-                        logger.LogError("[ER]: Unexpected response - missing rate for currency '{MissingCurrency}'. Skipping this currency", currency.Value);
-                        continue;
-                    }
-
-                    ratePerCurrency.Add(currency, rate);
-                }
-
-                var updatedAt = DateTimeOffset.FromUnixTimeSeconds(responseContent.UnixTimestamp).UtcDateTime;
-
-                return new CurrencyRates(ratesQuery.BaseCurrency, ratePerCurrency, updatedAt);
-            }
+                .Bind(responseContent => responseContent.ToCurrencyRates(ratesQuery, logger));
         }
         else // StatusCode is not successful
         {
