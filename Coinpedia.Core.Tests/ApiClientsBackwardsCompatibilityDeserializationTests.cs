@@ -5,7 +5,7 @@ using Coinpedia.Infrastructure.ApiClients;
 
 namespace Coinpedia.Core.Tests;
 
-public class SerializationTests
+public class ApiClientsBackwardsCompatibilityDeserializationTests
 {
     private readonly CurrencySymbol EUR = new("EUR");
 
