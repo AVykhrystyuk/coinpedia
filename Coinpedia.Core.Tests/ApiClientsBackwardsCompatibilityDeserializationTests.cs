@@ -12,19 +12,19 @@ public class ApiClientsBackwardsCompatibilityDeserializationTests
     [Fact]
     public void Deserialize_CurrencyRates()
     {
-        var json = @"
+        var json = """
             {
-                ""BaseCurrency"": ""EUR"",
-                ""RatePerCurrency"": {
-                    ""USD"": 1.041802,
-                    ""EUR"": 1,
-                    ""BRL"": 6.275821,
-                    ""GBP"": 0.843899,
-                    ""AUD"": 1.661701
+                "BaseCurrency": "EUR",
+                "RatePerCurrency": {
+                    "USD": 1.041802,
+                    "EUR": 1,
+                    "BRL": 6.275821,
+                    "GBP": 0.843899,
+                    "AUD": 1.661701
                 },
-                ""UpdatedAt"": ""2025-01-21T01:19:17Z""     
+                "UpdatedAt": "2025-01-21T01:19:17Z"     
             }
-        ";
+        """;
 
         var currencyRates = JsonSerializer.Deserialize<CurrencyRates>(json)!;
 
@@ -35,14 +35,14 @@ public class ApiClientsBackwardsCompatibilityDeserializationTests
     [Fact]
     public void Deserialize_ExchangeRatesApiClient_ErrorResponseContent_1()
     {
-        var json = @"
+        var json = """
             {
-                ""error"": {
-                    ""code"": ""invalid_base_currency"",
-                    ""message"": ""An unexpected error ocurred. [Technical Support: support@apilayer.com]""
+                "error": {
+                    "code": "invalid_base_currency",
+                    "message": "An unexpected error ocurred. [Technical Support: support@apilayer.com]"
                 }
             }
-        ";
+        """;
 
         var errorResponseContent = JsonSerializer.Deserialize<ExchangeRatesApiClient.ErrorResponseContent>(json)!;
 
@@ -54,15 +54,15 @@ public class ApiClientsBackwardsCompatibilityDeserializationTests
     [Fact]
     public void Deserialize_ExchangeRatesApiClient_ErrorResponseContent_2()
     {
-        var json = @"
+        var json = """
             {
-                ""success"": false,
-                ""error"": {
-                    ""code"": 104,
-                    ""info"": ""Your monthly API request volume has been reached. Please upgrade your plan.""
+                "success": false,
+                "error": {
+                    "code": 104,
+                    "info": "Your monthly API request volume has been reached. Please upgrade your plan."
                 }
             }
-        ";
+        """;
 
         var errorResponseContent = JsonSerializer.Deserialize<ExchangeRatesApiClient.ErrorResponseContent>(json)!;
 
