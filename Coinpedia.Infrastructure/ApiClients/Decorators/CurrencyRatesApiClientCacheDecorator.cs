@@ -1,4 +1,6 @@
-﻿using Coinpedia.Core.ApiClients;
+﻿using Coinpedia.Core;
+
+using Coinpedia.Core.ApiClients;
 using Coinpedia.Core.Domain;
 using Coinpedia.Core.Errors;
 using Coinpedia.Infrastructure.Cache;
@@ -23,6 +25,8 @@ public class CurrencyRatesApiClientCacheDecorator(
         var tags = new[] { ratesQuery.BaseCurrency.Value };
         var cacheDuration = settings.Value.CacheDuration;
 
+        using var _ = logger.BeginAttributedScope(cacheKey, cacheDuration);
+
         var factoryGotCalled = false;
 
         var currencyRates = await cache.GetResultOrSetValueAsync<CurrencyRates, Error>(
@@ -35,7 +39,7 @@ public class CurrencyRatesApiClientCacheDecorator(
 
         if (!factoryGotCalled)
         {
-            logger.LogInformation("[Cache]: Currency rates are found in (and returned from) the cache, {cacheKey}", cacheKey);
+            logger.LogInformation("[Cache]: Currency rates are found in (and returned from) the cache");
         }
 
         return currencyRates;

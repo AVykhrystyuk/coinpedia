@@ -1,39 +1,39 @@
 using System.Text.Json;
 
-using Coinpedia.Core.Domain;
 using Coinpedia.Infrastructure.ApiClients;
 
-namespace Coinpedia.Core.Tests;
+namespace Coinpedia.Core.Tests.BackwardsCompatibility;
 
-public class ApiClientsBackwardsCompatibilityDeserializationTests
+public class ExchangeRatesApiClient_Deserialization_Tests
 {
-    private readonly CurrencySymbol EUR = new("EUR");
-
     [Fact]
-    public void Deserialize_CurrencyRates()
+    public void ResponseContent()
     {
         var json = """
             {
-                "BaseCurrency": "EUR",
-                "RatePerCurrency": {
-                    "USD": 1.041802,
+                "success": true,
+                "timestamp": 1738511955,
+                "base": "EUR",
+                "date": "2025-02-02",
+                "rates": {
                     "EUR": 1,
-                    "BRL": 6.275821,
-                    "GBP": 0.843899,
-                    "AUD": 1.661701
-                },
-                "UpdatedAt": "2025-01-21T01:19:17Z"     
+                    "USD": 1.036215,
+                    "BRL": 6.053612,
+                    "GBP": 0.836177,
+                    "AUD": 1.6614
+                }
             }
         """;
 
-        var currencyRates = JsonSerializer.Deserialize<CurrencyRates>(json)!;
+        var responseContent = JsonSerializer.Deserialize<ExchangeRatesApiClient.ResponseContent>(json)!;
 
-        Assert.Equal(EUR, currencyRates.BaseCurrency);
-        Assert.Equal(1, currencyRates.RatePerCurrency[EUR]);
+        Assert.Equal("EUR", responseContent.Base);
+        Assert.Equal(1, responseContent.Rates["EUR"]);
+        Assert.Equal(5, responseContent.Rates.Count);
     }
 
     [Fact]
-    public void Deserialize_ExchangeRatesApiClient_ErrorResponseContent_1()
+    public void ErrorResponseContent_1()
     {
         var json = """
             {
@@ -52,7 +52,7 @@ public class ApiClientsBackwardsCompatibilityDeserializationTests
     }
 
     [Fact]
-    public void Deserialize_ExchangeRatesApiClient_ErrorResponseContent_2()
+    public void ErrorResponseContent_2()
     {
         var json = """
             {

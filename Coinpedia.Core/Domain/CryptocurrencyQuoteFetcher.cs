@@ -28,8 +28,8 @@ public class CryptocurrencyQuoteFetcher(
             return baseCurrencyErr;
         }
 
-        // TODO: [Load-mitigation]: cache this call (into a distributed cache storage) for 5 minutes. LRU cache? since there are so many different cryptocurrencies
-
+        // NOTE: uses cache (decorated)
+        // TODO: [memory-consumption-mitigation]: LRU cache? since there are so many different cryptocurrencies
         var cryptocurrencyQuoteTask = cryptocurrencyQuoteApiClient.GetCryptocurrencyQuote(
             searchQuery: new CryptocurrencyQuoteSearchQuery(symbol, BaseCurrency: baseCurrency),
             cancellationToken);
@@ -53,11 +53,25 @@ public class CryptocurrencyQuoteFetcher(
         return cryptocurrencyQuote.Apply(currencyRates);
     }
 
-    private Task<Result<CurrencyRates, Error>> GetCurrencyRates(CurrencySymbol baseCurrency, CancellationToken cancellationToken)
+    private async Task<Result<CurrencyRates, Error>> GetCurrencyRates(CurrencySymbol baseCurrency, CancellationToken cancellationToken)
     {
-        var requiredCurrencies = settings.Value.RequiredCurrencies
+        var rawRequiredCurrencies = settings.Value.RequiredCurrencies
             .Split(",", StringSplitOptions.RemoveEmptyEntries)
             .Distinct(StringComparer.InvariantCultureIgnoreCase)
+            .ToArray();
+
+        if (rawRequiredCurrencies.Length == 0)
+        {
+            return new InternalError
+            {
+                Message = "Required currencies are not provided. They must be configured in settings",
+                Context = new { settings.Value.RequiredCurrencies, rawRequiredCurrencies }
+            };
+        }
+
+        using var _ = logger.BeginAttributedScope(rawRequiredCurrencies);
+
+        var requiredCurrencies = rawRequiredCurrencies
             .Select(currency => CurrencySymbol.TryCreate(currency)
                 .TapError(err => logger.LogWarning("Failed to create a currencySymbol: {@Error}", err))
             )
@@ -66,7 +80,7 @@ public class CryptocurrencyQuoteFetcher(
             .ToArray();
 
         // NOTE: uses cache (decorated)
-        return currencyRatesApiClient.GetCurrencyRates(
+        return await currencyRatesApiClient.GetCurrencyRates(
             new GetCurrencyRatesQuery(baseCurrency, requiredCurrencies),
             cancellationToken);
     }
