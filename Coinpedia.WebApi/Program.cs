@@ -31,6 +31,7 @@ try
 catch (Exception ex)
 {
     Log.Fatal(ex, "An unhandled exception occurred during bootstrapping. Application terminated unexpectedly.");
+    throw;
 }
 finally
 {

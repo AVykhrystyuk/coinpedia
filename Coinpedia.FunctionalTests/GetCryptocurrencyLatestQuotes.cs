@@ -10,8 +10,14 @@ using static Coinpedia.WebApi.Handlers.CryptocurrencyHandlers;
 
 namespace Coinpedia.FunctionalTests;
 
-public class GetCryptocurrencyLatestQuotes(TestWebAppFactory app) : BaseFuncionalTest(app)
+public class GetCryptocurrencyLatestQuotes : BaseFuncionalTest
 {
+    public GetCryptocurrencyLatestQuotes(TestWebAppFactory app) : base(app)
+    {
+        App.BaseCurrency = "EUR";
+        App.ExtraCurrency = "TTT";
+    }
+
     [Fact]
     public async Task ShouldReturn_Ok_When_BtcCryptocurrencyIsRequested()
     {
@@ -20,13 +26,18 @@ public class GetCryptocurrencyLatestQuotes(TestWebAppFactory app) : BaseFunciona
 
         var settings = scope.ServiceProvider.GetRequiredService<IOptions<Settings>>().Value;
 
-        var currency = settings.BaseCurrency;
+        var baseCurrency = settings.BaseCurrency;
+        var baseCurrencyPrice = 935000.00775880407M;
+        var extraCurrency = App.ExtraCurrency ?? "NONE";
+        var extraCurrencyRate = 1.05M;
+
         var symbol = "BTC";
 
         App.ExchangeRatesApiClientResponseHandler = request =>
-            HttpResponseMessages.OK(ApiClientJsonResponses.ExchangeRates.Ok(currency));
+            HttpResponseMessages.OK(ApiClientJsonResponses.ExchangeRates.Ok(baseCurrency, extraCurrency, extraCurrencyRate));
+
         App.CryptocurrencyQuoteApiClientResponseHandler = request =>
-            HttpResponseMessages.OK(ApiClientJsonResponses.CoinMarketCap.Ok(symbol, currency));
+            HttpResponseMessages.OK(ApiClientJsonResponses.CoinMarketCap.Ok(symbol, baseCurrency, baseCurrencyPrice));
 
         // Act
         var response = await HttpClient.GetAsync($"/v1/cryptocurrencies/{symbol}/quotes/latest");
@@ -38,8 +49,9 @@ public class GetCryptocurrencyLatestQuotes(TestWebAppFactory app) : BaseFunciona
         // Assert
         Assert.NotNull(quotes);
         Assert.Equal(symbol, quotes.Cryptocurrency);
-        Assert.Equal(currency, quotes.BaseCurrency);
-        Assert.Equal(5, quotes.PricePerCurrency.Count);
-        Assert.Equal(93419.00775880407M, quotes.PricePerCurrency[currency]);
+        Assert.Equal(baseCurrency, quotes.BaseCurrency);
+        Assert.Equal(5 + 1 /* ExtraCurrency */, quotes.PricePerCurrency.Count);
+        Assert.Equal(baseCurrencyPrice, quotes.PricePerCurrency[baseCurrency]);
+        Assert.Equal(baseCurrencyPrice * extraCurrencyRate, quotes.PricePerCurrency[extraCurrency]);
     }
 }

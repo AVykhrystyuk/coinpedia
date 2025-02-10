@@ -4,7 +4,7 @@ public static class ApiClientJsonResponses
 {
     public static class ExchangeRates
     {
-        public static string Ok(string baseCurrency) => $$"""
+        public static string Ok(string baseCurrency, string extraCurrency, decimal extraCurrencyRate) => $$"""
             {
                 "success": true,
                 "timestamp": 1739142255,
@@ -15,7 +15,8 @@ public static class ApiClientJsonResponses
                     "BRL": 5.982972,
                     "GBP": 0.831746,
                     "AUD": 1.648363,
-                    "EUR": 1
+                    "EUR": 1,
+                    "{{extraCurrency}}": {{extraCurrencyRate}}
                 }
             }
             """;
@@ -23,7 +24,7 @@ public static class ApiClientJsonResponses
 
     public static class CoinMarketCap
     {
-        public static string Ok(string symbol, string baseCurrency) => $$"""
+        public static string Ok(string symbol, string baseCurrency, decimal baseCurrencyPrice) => $$"""
             {
                 "status": {
                     "timestamp": "2025-02-09T23:50:18.050Z",
@@ -51,7 +52,7 @@ public static class ApiClientJsonResponses
                             "last_updated": "2025-02-09T23:48:00.000Z",
                             "quote": {
                                 "{{baseCurrency}}": {
-                                    "price": 93419.00775880407,
+                                    "price": {{baseCurrencyPrice}},
                                     "volume_24h": 26205547470.920208,
                                     "volume_change_24h": 15.766,
                                     "percent_change_1h": 0.30324863,
