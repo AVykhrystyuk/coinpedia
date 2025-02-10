@@ -7,10 +7,10 @@ using Microsoft.Extensions.Logging;
 
 namespace Coinpedia.Infrastructure.ApiClients;
 
-public static class CoinMarketCapCryptocurrencyQuoteApiClientExtensions
+public static class CoinMarketCapApiClientExtensions
 {
     public static Result<CryptocurrencyQuote, Error> ToCryptocurrencyQuote(
-        this CoinMarketCapCryptocurrencyQuoteApiClient.ResponseContent responseContent,
+        this CoinMarketCapApiClient.ResponseContent responseContent,
         CryptocurrencyQuoteSearchQuery searchQuery,
         ILogger logger
     )

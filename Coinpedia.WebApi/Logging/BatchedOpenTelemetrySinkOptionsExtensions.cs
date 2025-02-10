@@ -6,7 +6,7 @@ namespace Coinpedia.WebApi.Logging;
 
 public static class BatchedOpenTelemetrySinkOptionsExtensions
 {
-    public static void Configure(this BatchedOpenTelemetrySinkOptions options, IWebHostEnvironment environment, SeqSettings settings)
+    public static void ConfigureSeq(this BatchedOpenTelemetrySinkOptions options, IHostEnvironment environment, SeqSettings settings)
     {
         options.Endpoint = settings.IngestionUrl;
         options.Protocol = OtlpProtocol.HttpProtobuf;

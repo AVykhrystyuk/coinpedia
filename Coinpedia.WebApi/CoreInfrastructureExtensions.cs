@@ -1,4 +1,4 @@
-using Coinpedia.Core;
+﻿using Coinpedia.Core;
 using Coinpedia.Core.ApiClients;
 using Coinpedia.Core.Domain;
 using Coinpedia.Infrastructure.ApiClients;
@@ -18,9 +18,7 @@ public static class CoreInfrastructureExtensions
 {
     public static IServiceCollection AddCryptocurrencyQuoteApiClient(this IServiceCollection services)
     {
-        services.AddScoped<CoinMarketCapCryptocurrencyQuoteApiClient>();
-
-        services.AddHttpClient<CoinMarketCapCryptocurrencyQuoteApiClient>((sp, client) =>
+        services.AddHttpClient<CoinMarketCapApiClient>((sp, client) =>
         {
             var settings = sp.GetRequiredService<IOptions<CoinMarketCapSettings>>().Value;
             client.DefaultRequestHeaders.Add("X-Coinpedia-Correlation-ID", CorrelationId.Value);
@@ -31,7 +29,7 @@ public static class CoreInfrastructureExtensions
         services.AddTransient<IOptions<ICryptocurrencyQuoteApiClientCacheSettings>>(sp => sp.GetRequiredService<IOptions<CoinMarketCapSettings>>());
 
         services.AddScoped<ICryptocurrencyQuoteApiClient, CryptocurrencyQuoteApiClientCacheDecorator>(sp => new CryptocurrencyQuoteApiClientCacheDecorator(
-            apiClient: sp.GetRequiredService<CoinMarketCapCryptocurrencyQuoteApiClient>(),
+            apiClient: sp.GetRequiredService<CoinMarketCapApiClient>(),
             cache: sp.GetRequiredService<IFusionCache>(),
             settings: sp.GetRequiredService<IOptions<ICryptocurrencyQuoteApiClientCacheSettings>>(),
             logger: sp.GetRequiredService<ILogger<CryptocurrencyQuoteApiClientCacheDecorator>>()
@@ -42,18 +40,19 @@ public static class CoreInfrastructureExtensions
 
     public static IServiceCollection AddCurrencyRatesApiClient(this IServiceCollection services)
     {
+        // ExchangeRatesApiClient requires something from settings, but settings currently live at the highest level (WebApi)
         services.AddTransient<IOptions<IExchangeRatesSettings>>(sp => sp.GetRequiredService<IOptions<ExchangeRatesSettings>>());
-
-        services.AddScoped<ExchangeRatesApiClient>();
 
         services.AddHttpClient<ExchangeRatesApiClient>((sp, client) =>
         {
             var settings = sp.GetRequiredService<IOptions<ExchangeRatesSettings>>().Value;
             client.DefaultRequestHeaders.Add("X-Coinpedia-Correlation-ID", CorrelationId.Value);
-            // ApiKey is passed through queryString
+            // NOTE: ApiKey is passed through QueryString
             client.BaseAddress = new Uri(settings.BaseUrl);
-        }).AddPolicyHandler(HttpRetryPolicies.Default());
+        })
+        .AddPolicyHandler(HttpRetryPolicies.Default());
 
+        // CurrencyRatesApiClientCacheDecorator requires something from settings, but settings currently live at the highest level (WebApi)
         services.AddTransient<IOptions<ICurrencyRatesApiClientCacheSettings>>(sp => sp.GetRequiredService<IOptions<ExchangeRatesSettings>>());
 
         services.AddScoped<ICurrencyRatesApiClient, CurrencyRatesApiClientCacheDecorator>(sp => new CurrencyRatesApiClientCacheDecorator(
@@ -68,6 +67,7 @@ public static class CoreInfrastructureExtensions
 
     public static IServiceCollection AddCryptocurrencyQuoteFetcher(this IServiceCollection services)
     {
+        // CryptocurrencyQuoteFetcher requires something from settings, but settings currently live at the highest level (WebApi)
         services.AddTransient<IOptions<ICryptocurrencyQuoteFetcherSettings>>(sp => sp.GetRequiredService<IOptions<Settings>>());
         services.AddScoped<ICryptocurrencyQuoteFetcher, CryptocurrencyQuoteFetcher>();
 

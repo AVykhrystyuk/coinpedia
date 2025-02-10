@@ -11,9 +11,9 @@ using Microsoft.Extensions.Logging;
 
 namespace Coinpedia.Infrastructure.ApiClients;
 
-public class CoinMarketCapCryptocurrencyQuoteApiClient(
+public class CoinMarketCapApiClient(
     HttpClient httpClient,
-    ILogger<CoinMarketCapCryptocurrencyQuoteApiClient> logger
+    ILogger<CoinMarketCapApiClient> logger
 ) : ICryptocurrencyQuoteApiClient
 {
     /// <returns>

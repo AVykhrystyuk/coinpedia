@@ -10,32 +10,36 @@ namespace Coinpedia.WebApi.Logging;
 
 public static class LoggerConfigurationExtensions
 {
-    public static LoggerConfiguration ConfigureBootstrap(this LoggerConfiguration config)
+    public static LoggerConfiguration ConfigureBootstrap(this LoggerConfiguration loggerConfig)
     {
-        return config
+        return loggerConfig
             .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
             .Enrich.FromLogContext()
             .WriteTo.Console();
     }
 
-    public static LoggerConfiguration Configure(this LoggerConfiguration config, WebApplicationBuilder builder, IServiceProvider services)
+    public static LoggerConfiguration WriteToOpenTelemetry(this LoggerConfiguration loggerConfig, IServiceProvider services)
     {
-        var settings = builder.Configuration.GetSection(SeqSettings.SectionKey).Get<SeqSettings>() 
+        var environment = services.GetRequiredService<IHostEnvironment>();
+        var configuration = services.GetRequiredService<IConfiguration>();
+
+        var settings = configuration.GetSection(SeqSettings.SectionKey).Get<SeqSettings>() 
             ?? throw new Exception($"{SeqSettings.SectionKey} configuration section is missing");
 
-        return config
+        return loggerConfig.WriteTo.OpenTelemetry(options => options.ConfigureSeq(environment, settings));
+    }
+
+    public static LoggerConfiguration Configure(this LoggerConfiguration loggerConfig, IServiceProvider services) =>
+        loggerConfig
             .ReadFrom.Services(services)
             .Enrich.FromLogContext()
             .Enrich.WithSpan()
             .Enrich.WithExceptionDetails()
-            .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+            .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning);
             //.MinimumLevel.Override("Microsoft.AspNetCore.Hosting", LogEventLevel.Warning)
             //.MinimumLevel.Override("Microsoft.AspNetCore.Mvc", LogEventLevel.Warning)
             //.MinimumLevel.Override("Microsoft.AspNetCore.Routing", LogEventLevel.Warning)
             //.MinimumLevel.Override("Microsoft.AspNetCore.Http", LogEventLevel.Warning)
-            .WriteTo.Console()
-            .WriteTo.OpenTelemetry(options => options.Configure(builder.Environment, settings));
-    }
 
     public static T Error<T>(this IDiagnosticContext context, T error)
         where T: Error

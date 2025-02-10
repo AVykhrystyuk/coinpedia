@@ -39,7 +39,10 @@ finally
 
 static void ConfigureServices(WebApplicationBuilder builder)
 {
-    builder.Services.AddSerilog((services, loggerConfig) => loggerConfig.Configure(builder, services));
+    builder.Services.AddSerilog((services, loggerConfig) => loggerConfig
+        .Configure(services)
+        .WriteToOpenTelemetry(services)
+        .WriteTo.Console());
     builder.Services.AddScoped<CorrelationIdMiddleware>();
 
     builder.Services.AddCache(builder.Configuration);
@@ -79,3 +82,5 @@ static void ConfigureApp(WebApplication app)
 
     app.UseExceptionHandler();
 }
+
+public partial class Program;

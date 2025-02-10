@@ -36,13 +36,13 @@ public static class CryptocurrencyHandlers
         var (_, _, symbol, err) = CryptocurrencySymbol.TryCreate(symbolRaw);
         if (err is not null)
         {
-            return TypedResults.Json(err, statusCode: StatusCodes.Status400BadRequest);
+            return Json(err, StatusCodes.Status400BadRequest);
         }
 
         var searchResult = await cryptocurrencyQuoteFetcher.FetchCryptocurrencyQuote(symbol, cancellationToken);
         if (searchResult.IsSuccess)
         {
-            return TypedResults.Ok(searchResult.Value.ToDto());
+            return Ok(searchResult.Value.ToDto());
         }
         else // Failure
         {
@@ -61,6 +61,8 @@ public static class CryptocurrencyHandlers
             };
         }
 
+        static Ok<MultiCurrencyCryptocurrencyQuotesDto> Ok(MultiCurrencyCryptocurrencyQuotesDto body) =>
+            TypedResults.Ok(body);
         static JsonHttpResult<Error> Json(Error error, int statusCode) =>
             TypedResults.Json(error, statusCode: statusCode);
     }
