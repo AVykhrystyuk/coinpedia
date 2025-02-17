@@ -2,7 +2,5 @@
 
 public class BaseFuncionalTest(TestWebAppFactory app) : IClassFixture<TestWebAppFactory>
 {
-    protected HttpClient HttpClient { get; } = app.CreateClient();
-
-    protected TestWebAppFactory App => app;
+    protected TestWebAppFactory App { get; } = app;
 }

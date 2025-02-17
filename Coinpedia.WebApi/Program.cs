@@ -40,6 +40,8 @@ finally
 
 static void ConfigureServices(WebApplicationBuilder builder)
 {
+    builder.Services.AddSingleton(TimeProvider.System);
+
     builder.Services.AddSerilog((services, loggerConfig) => loggerConfig
         .Configure(services)
         .WriteToOpenTelemetry(services)

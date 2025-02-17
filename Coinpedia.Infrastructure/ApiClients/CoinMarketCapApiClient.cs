@@ -82,7 +82,7 @@ public class CoinMarketCapApiClient(
                     logger.Log(LogLevel.Critical, "[CMC]: API request was rejected due to it being a paid subscription plan with an overdue balance");
                     return new InternalError { Message = "[CryptocurrencyApi]: Unexpected response. For more info contact the support", Context = Context() };
                 case var c:
-                    return new InternalError { Message = "[CryptocurrencyApi]: Unexpected response. For more info contact the support", Context = NonSuccessfulContext(response.StatusCode) };
+                    return new FailedDependency { Message = "[CryptocurrencyApi]: Unexpected response. For more info contact the support", Context = NonSuccessfulContext(response.StatusCode) };
             }
         }
 
@@ -158,7 +158,7 @@ public class CoinMarketCapApiClient(
         public decimal? SelfReportedMarketCap { get; init; }
 
         [JsonPropertyName("last_updated")]
-        public required DateTime LastUpdated { get; init; }
+        public required DateTimeOffset LastUpdated { get; init; }
 
         [JsonPropertyName("quote")]
         public required IReadOnlyDictionary<string, Quote> QuotePerCurrency { get; init; }
@@ -194,6 +194,6 @@ public class CoinMarketCapApiClient(
         public decimal? FullyDilutedMarketCap { get; init; }
 
         [JsonPropertyName("last_updated")]
-        public required DateTime LastUpdated { get; init; }
+        public required DateTimeOffset LastUpdated { get; init; }
     }
 }

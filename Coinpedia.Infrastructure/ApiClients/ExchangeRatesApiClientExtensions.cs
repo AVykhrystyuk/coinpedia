@@ -27,7 +27,7 @@ public static class ExchangeRatesApiClientExtensions
             ratePerCurrency.Add(currency, rate);
         }
 
-        var updatedAt = DateTimeOffset.FromUnixTimeSeconds(responseContent.UnixTimestamp).UtcDateTime;
+        var updatedAt = DateTimeOffset.FromUnixTimeSeconds(responseContent.UnixTimestamp);
 
         return new CurrencyRates(ratesQuery.BaseCurrency, ratePerCurrency, updatedAt);
     }

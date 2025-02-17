@@ -1,6 +1,7 @@
 ﻿using Coinpedia.Core;
 using Coinpedia.Core.Domain;
 using Coinpedia.Core.Errors;
+using Coinpedia.WebApi.Errors;
 using Coinpedia.WebApi.Logging;
 
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -24,19 +25,22 @@ public static class CryptocurrencyHandlers
         return builder;
     }
 
-    public static async Task<Results<Ok<MultiCurrencyCryptocurrencyQuotesDto>, JsonHttpResult<Error>>> GetLatestQuote(
+    public static async Task<Results<Ok<MultiCurrencyCryptocurrencyQuotesDto>, JsonHttpResult<ErrorDto>>> GetLatestQuote(
         [FromRoute(Name = "symbol")] string symbolRaw,
         [FromServices] ICryptocurrencyQuoteFetcher cryptocurrencyQuoteFetcher,
         [FromServices] ILogger<Logs> logger,
         [FromServices] IDiagnosticContext diagnosticContext,
+        [FromServices] TimeProvider timeProvider,
         CancellationToken cancellationToken)
     {
+        var timestamp = timeProvider.GetUtcNow();
+
         using var _ = logger.BeginAttributedScope(symbolRaw, arg1Name: "symbol");
 
         var (_, _, symbol, err) = CryptocurrencySymbol.TryCreate(symbolRaw);
         if (err is not null)
         {
-            return Json(err, StatusCodes.Status400BadRequest);
+            return Err(err, StatusCodes.Status400BadRequest, timestamp);
         }
 
         var searchResult = await cryptocurrencyQuoteFetcher.FetchCryptocurrencyQuote(symbol, cancellationToken);
@@ -52,19 +56,25 @@ public static class CryptocurrencyHandlers
 
             return error switch
             {
-                Core.Errors.NotFound => Json(error, StatusCodes.Status404NotFound),
-                None => Json(error, StatusCodes.Status424FailedDependency),
-                TooManyRequests => Json(error, StatusCodes.Status429TooManyRequests),
-                InvalidInput => Json(error, StatusCodes.Status400BadRequest),
-                RequestCancelled => Json(error, StatusCodes.Status499ClientClosedRequest),
-                _ => Json(error, StatusCodes.Status500InternalServerError),
+                Core.Errors.NotFound => Err(error, StatusCodes.Status404NotFound, timestamp),
+                None => Err(error, StatusCodes.Status424FailedDependency, timestamp),
+                FailedDependency => Err(error, StatusCodes.Status424FailedDependency, timestamp),
+                TooManyRequests => Err(error, StatusCodes.Status429TooManyRequests, timestamp),
+                InvalidInput => Err(error, StatusCodes.Status400BadRequest, timestamp),
+                RequestCancelled => Err(error, StatusCodes.Status499ClientClosedRequest, timestamp),
+                _ => Err(error, StatusCodes.Status500InternalServerError, timestamp),
             };
         }
 
         static Ok<MultiCurrencyCryptocurrencyQuotesDto> Ok(MultiCurrencyCryptocurrencyQuotesDto body) =>
             TypedResults.Ok(body);
-        static JsonHttpResult<Error> Json(Error error, int statusCode) =>
-            TypedResults.Json(error, statusCode: statusCode);
+        static JsonHttpResult<ErrorDto> Err(Error error, int statusCode, DateTimeOffset timestamp) =>
+            TypedResults.Json(new ErrorDto(
+                Timestamp: timestamp.UtcDateTime,
+                StatusCode: statusCode,
+                Error: error.GetType().Name,
+                ErrorMessage: error.Message
+            ), statusCode: statusCode);
     }
 
     public record MultiCurrencyCryptocurrencyQuotesDto(
@@ -76,8 +86,8 @@ public static class CryptocurrencyHandlers
 
     private static MultiCurrencyCryptocurrencyQuotesDto ToDto(this MultiCurrencyCryptocurrencyQuotes quotes) =>
         new(quotes.Cryptocurrency.Value,
-            quotes.CryptocurrencyUpdatedAt,
-            quotes.CurrencyRatesUpdatedAt,
+            quotes.CryptocurrencyUpdatedAt.UtcDateTime,
+            quotes.CurrencyRatesUpdatedAt.UtcDateTime,
             quotes.PricePerCurrency.ToDictionary(p => p.Key.Value, p => p.Value),
             quotes.BaseCurrency.Value);
 }

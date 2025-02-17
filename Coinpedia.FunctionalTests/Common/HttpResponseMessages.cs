@@ -19,4 +19,9 @@ public static class HttpResponseMessages
     {
         Content = new StringContent(content, Encoding, MediaType)
     };
+
+    public static HttpResponseMessage InternalServerError() => new(HttpStatusCode.InternalServerError)
+    {
+        // Content = new StringContent(content, Encoding, MediaType)
+    };
 }

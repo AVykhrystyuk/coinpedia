@@ -4,7 +4,7 @@ public static class ApiClientJsonResponses
 {
     public static class ExchangeRates
     {
-        public static string Ok(string baseCurrency, string extraCurrency, decimal extraCurrencyRate) => $$"""
+        public static string Ok(string baseCurrency, (string Currency, decimal RateValue)? extraRate = null) => $$"""
             {
                 "success": true,
                 "timestamp": 1739142255,
@@ -15,8 +15,12 @@ public static class ApiClientJsonResponses
                     "BRL": 5.982972,
                     "GBP": 0.831746,
                     "AUD": 1.648363,
-                    "EUR": 1,
-                    "{{extraCurrency}}": {{extraCurrencyRate}}
+                    "{{baseCurrency}}": 1
+                    {{(
+                    extraRate is { } r
+                        ? $$""", "{{r.Currency}}": {{r.RateValue}}"""
+                        : ""
+                    )}}
                 }
             }
             """;
@@ -24,16 +28,20 @@ public static class ApiClientJsonResponses
 
     public static class CoinMarketCap
     {
+        private static string OkStatus(int creditCount = 1) => $$"""
+            {
+                "timestamp": "2025-02-09T23:50:18.050Z",
+                "error_code": 0,
+                "error_message": null,
+                "elapsed": 23,
+                "credit_count": {{creditCount}},
+                "notice": null
+            }
+        """;
+
         public static string Ok(string symbol, string baseCurrency, decimal baseCurrencyPrice) => $$"""
             {
-                "status": {
-                    "timestamp": "2025-02-09T23:50:18.050Z",
-                    "error_code": 0,
-                    "error_message": null,
-                    "elapsed": 23,
-                    "credit_count": 1,
-                    "notice": null
-                },
+                "status": {{OkStatus()}},
                 "data": {
                     "{{symbol}}": [
                         {
@@ -111,6 +119,15 @@ public static class ApiClientJsonResponses
                             }
                         }
                     ]
+                }
+            }
+            """;
+
+        public static string NotFound(string symbol) => $$"""
+            {
+                "status": {{OkStatus()}},
+                "data": {
+                    "{{symbol}}": []
                 }
             }
             """;

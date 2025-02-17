@@ -47,6 +47,7 @@ public class CryptocurrencyQuoteFetcher(
         var (_, _, currencyRates, currencyRatesFailure) = await currencyRatesTask;
         if (currencyRatesFailure is not null)
         {
+            // TODO: should we not fail when currency rates are unavailable? should we just fallback to only showing the base currency rate?
             return currencyRatesFailure;
         }
 

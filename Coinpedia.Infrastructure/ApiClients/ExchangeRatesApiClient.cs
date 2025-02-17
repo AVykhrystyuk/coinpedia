@@ -103,7 +103,7 @@ public class ExchangeRatesApiClient(
                 case HttpStatusCode.TooManyRequests:
                     return new TooManyRequests { Message = "[ExchangeRatesApi]: The API rate limit was exceeded; consider slowing down your API Request frequency", Context = Context() };
                 case var c:
-                    return new InternalError { Message = "[ExchangeRatesApi]: Unexpected response. For more info contact the support", Context = NonSuccessfulContext(response.StatusCode) };
+                    return new FailedDependency { Message = "[ExchangeRatesApi]: Unexpected response. For more info contact the support", Context = NonSuccessfulContext(response.StatusCode) };
             }
         }
 

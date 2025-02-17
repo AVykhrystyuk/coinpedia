@@ -17,30 +17,53 @@ public class TestWebAppFactory : WebApplicationFactory<Program>
     {
         base.ConfigureWebHost(builder);
 
-        builder.ConfigureTestServices(services =>
-        {
-            // overrides whatever is configured in the app
-            services.AddSerilog(configureLogger: (sp, loggerConfig) => loggerConfig
-                .Configure(sp)
-                .WriteTo.Console());
-
-            services.TurnOffFusionCache();
-
-            services.RemoveOptions<Settings>();
-            services.AddSingleton(_ => Options.Create(new Settings
-            {
-                BaseCurrency = BaseCurrency,
-                RequiredCurrencies = $"USD,EUR,BRL,GBP,AUD{(ExtraCurrency is { } cur ? $",{cur}" : "")}",
-            }));
-
-            services.MockExchangeRatesApiClient((request) => ExchangeRatesApiClientResponseHandler(request));
-            services.MockCryptocurrencyQuoteApiClient((request) => CryptocurrencyQuoteApiClientResponseHandler(request));
-        });
+        builder.ConfigureTestServices(OverrideWebHostConfiguration);
     }
 
-    public string BaseCurrency { get; set; } = "EUR";
+    public TestSetup? TestSetup { get; set; }
+
+    private void OverrideWebHostConfiguration(IServiceCollection services)
+    {
+        services.AddSerilog(configureLogger: (sp, loggerConfig) => loggerConfig
+            .Configure(sp)
+            .WriteTo.Console());
+
+        services.TurnOffFusionCache();
+
+        FakeSettings(services);
+
+        services.MockExchangeRatesApiClient(ExchangeRatesApiClientResponseHandler);
+        services.MockCryptocurrencyQuoteApiClient(CryptocurrencyQuoteApiClientResponseHandler);
+    }
+
+    private void FakeSettings(IServiceCollection services)
+    {
+        services.RemoveOptions<Settings>();
+        services.AddSingleton(_ => Options.Create(new Settings
+        {
+            BaseCurrency = TestSetup?.BaseCurrency ?? "EUR",
+            RequiredCurrencies = $"USD,EUR,BRL,GBP,AUD{(TestSetup?.ExtraCurrency is { } cur ? $",{cur}" : "")}",
+        })); 
+    }
+
+    private HttpResponseMessage ExchangeRatesApiClientResponseHandler(HttpRequestMessage request)
+    {
+        var handler = TestSetup?.ExchangeRatesApiClientResponseHandler ?? HttpResponseMessages.NotImplementedFunc;
+        return handler(request);
+    }
+
+    private HttpResponseMessage CryptocurrencyQuoteApiClientResponseHandler(HttpRequestMessage request)
+    {
+        var handler = TestSetup?.CryptocurrencyQuoteApiClientResponseHandler ?? HttpResponseMessages.NotImplementedFunc;
+        return handler(request);
+    }
+}
+
+public class TestSetup
+{
+    public string? BaseCurrency { get; set; }
     public string? ExtraCurrency { get; set; }
 
-    public Func<HttpRequestMessage, HttpResponseMessage> ExchangeRatesApiClientResponseHandler { get; set; } = HttpResponseMessages.NotImplementedFunc;
-    public Func<HttpRequestMessage, HttpResponseMessage> CryptocurrencyQuoteApiClientResponseHandler { get; set; } = HttpResponseMessages.NotImplementedFunc;
+    public Func<HttpRequestMessage, HttpResponseMessage>? ExchangeRatesApiClientResponseHandler { get; set; }
+    public Func<HttpRequestMessage, HttpResponseMessage>? CryptocurrencyQuoteApiClientResponseHandler { get; set; }
 }

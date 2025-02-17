@@ -10,7 +10,7 @@ public interface ICryptocurrencyQuoteFetcher
 
 public record MultiCurrencyCryptocurrencyQuotes(
     CryptocurrencySymbol Cryptocurrency,
-    DateTime CryptocurrencyUpdatedAt,
-    DateTime CurrencyRatesUpdatedAt,
+    DateTimeOffset CryptocurrencyUpdatedAt,
+    DateTimeOffset CurrencyRatesUpdatedAt,
     IReadOnlyDictionary<CurrencySymbol, decimal> PricePerCurrency,
     CurrencySymbol BaseCurrency);

@@ -4,7 +4,7 @@ namespace Coinpedia.Core.Domain;
 
 public record CryptocurrencyQuote(
     CryptocurrencySymbol Cryptocurrency,
-    DateTime UpdatedAt,
+    DateTimeOffset UpdatedAt,
     decimal Price,
     CurrencySymbol Currency
 )
